@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雲教室文字剪貼簿V3 - 可收合側邊欄</title>
+<title>雲教室文字剪貼簿V2</title>
 <style>
     /* --- 全域設計變數 --- */
     :root {
-        --primary-color: #007bff; /* 主題色 */
-        --primary-hover: #0056b3; /* 主題懸停色 */
-        --secondary-color: #6c757d; /* 次要色 */
-        --light-gray: #f8f9fa;      /* 淺灰色背景 */
-        --border-color: #dee2e6;    /* 邊框顏色 */
-        --card-bg: #ffffff;         /* 卡片背景色 */
-        --shadow: 0 4px 8px rgba(0,0,0,0.1); /* 標準陰影 */
-        --success-color: #28a745;   /* 成功提示色 */
-        --sidebar-width: 300px; /* 側邊欄寬度 */
+        --primary-color: #007bff;
+        --primary-hover: #0056b3;
+        --secondary-color: #6c757d;
+        --light-gray: #f8f9fa;
+        --border-color: #dee2e6;
+        --card-bg: #ffffff;
+        --shadow: 0 4px 8px rgba(0,0,0,0.1);
+        --success-color: #28a745;
+        --sidebar-width: 300px;
     }
 
     /* --- 基本佈局 --- */
@@ -24,15 +24,15 @@
         background-color: var(--light-gray);
         margin: 0;
         height: 100vh;
-        overflow-x: hidden;
+        overflow: hidden;
     }
     .container { 
+        display: flex;
         width: 100%; 
         height: 100%; 
-        position: relative; 
     }
     
-    /* --- 【修改】側邊欄預設為固定定位，並移出畫面外 --- */
+    /* --- 側邊欄佈局與動畫 --- */
     .sidebar { 
         width: var(--sidebar-width); 
         min-width: 280px; 
@@ -43,70 +43,57 @@
         padding: 15px; 
         box-shadow: var(--shadow); 
         z-index: 100;
-        transition: transform 0.3s ease-in-out; /* 滑動動畫效果 */
-        position: fixed; /* 【修改】改為固定定位，使其脫離文檔流 */
-        top: 0;
-        left: 0;
-        height: 100%;
-        transform: translateX(-100%); /* 【修改】預設狀態下向左移出畫面 */
+        flex-shrink: 0;
+        transition: margin-left 0.3s ease-in-out;
+        margin-left: calc(var(--sidebar-width) * -1);
     }
-
-    /* --- 【新增】當容器有 .sidebar-open class 時，將側邊欄滑入 --- */
     .container.sidebar-open .sidebar {
-        transform: translateX(0);
+        margin-left: 0;
     }
 
-    /* --- 【修改】主內容區預設填滿，並增加左邊內距放置按鈕 --- */
+    /* --- 主內容區佈局 --- */
     .main-content { 
         flex-grow: 1; 
         padding: 20px; 
-        overflow-y: auto; 
-        position: relative;
-        padding-left: 60px; /* 【修改】增加左內距，避免內容被按鈕擋住 */
-        padding-top: 60px;  /* 【修改】增加上內距，讓標題與按鈕對齊 */
+        overflow-y: auto;
+        height: 100vh;
+        box-sizing: border-box;
     }
     
     /* --- 側邊欄開關按鈕 --- */
     .sidebar-toggle-btn {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        z-index: 98; /* 【修改】Z-index調整，不需要比側邊欄高 */
-        display: block; /* 【修改】永遠顯示 */
-        font-size: 20px;
-        padding: 5px 10px;
-        background-color: rgba(255,255,255,0.8);
-        backdrop-filter: blur(5px);
-        border: 1px solid var(--border-color);
-    }
-
-    /* --- 螢幕遮罩 --- */
-    .overlay {
         position: fixed;
-        top: 0;
+        top: 50%;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.4);
-        z-index: 99;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease-in-out;
+        transform: translateY(-50%);
+        z-index: 101;
+        width: 25px;
+        height: 60px;
+        padding: 0;
+        border: 1px solid var(--border-color);
+        border-left: none;
+        background-color: rgba(255,255,255,0.9);
+        backdrop-filter: blur(5px);
+        border-radius: 0 8px 8px 0;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: left 0.3s ease-in-out;
     }
-    .container.sidebar-open .overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
+    .sidebar-toggle-btn:hover { background-color: white; }
+    .container.sidebar-open .sidebar-toggle-btn { left: var(--sidebar-width); }
+    .sidebar-toggle-btn .icon-open, .sidebar-toggle-btn .icon-close { transition: opacity 0.2s; }
+    .sidebar-toggle-btn .icon-close { display: none; }
+    .container.sidebar-open .sidebar-toggle-btn .icon-open { display: none; }
+    .container.sidebar-open .sidebar-toggle-btn .icon-close { display: inline; }
 
-    /* --- 【修改】移除原有的響應式佈局變更，因為新佈局已適用所有尺寸 --- */
-    /* @media (max-width: 768px) { ... }  此區塊中關於側邊欄 transform 的部分已被整合為預設樣式 */
-
-
-    /* --- 側邊欄元件 (樣式不變) --- */
+    /* --- 共通樣式 --- */
     .sidebar-header { padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
     .quick-add-container { margin-bottom: 15px; }
     #quick-add-input { width: 100%; padding: 10px 12px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 16px; box-sizing: border-box; }
-    #quick-add-input::placeholder { color: #999; }
     .search-box { width: 100%; padding: 8px 12px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
     .category-controls { display: flex; justify-content: space-between; }
     .category-list { list-style: none; padding: 0; margin-top: 15px; overflow-y: auto; flex-grow: 1; }
@@ -114,33 +101,36 @@
     .category-item.special-category { font-weight: 500; color: #333; }
     .category-item:hover, .category-item.active { background-color: #e9ecef; }
     .category-item-name { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* --- 主要內容區 (樣式不變) --- */
-    .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .content-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
     .content-header h2 { margin: 0; color: #333; }
+    .header-controls { display: flex; align-items: center; gap: 20px;}
     .snippet-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    .snippet-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: box-shadow 0.3s; cursor: grab; }
+    .snippet-card { border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: box-shadow 0.3s, background-color 0.3s; cursor: grab; }
     .snippet-card:active { cursor: grabbing; }
     .snippet-card.dragging { opacity: 0.5; background: #cce5ff; }
     .snippet-card:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-    .snippet-header { font-weight: bold; padding: 12px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-    .snippet-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .snippet-content { padding: 15px; white-space: pre-wrap; word-break: break-word; background-color: #fdfdfd; flex-grow: 1; font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; color: #333; min-height: 80px; max-height: 200px; overflow-y: auto; }
-    .snippet-footer { padding: 10px 15px; background-color: var(--light-gray); display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); }
-    
-    /* --- 按鈕與互動元件 (樣式不變) --- */
-    .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.2s, opacity 0.2s; margin-left: 5px; white-space: nowrap; }
+    .snippet-header { font-weight: bold; padding: 12px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .snippet-title { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .snippet-content { padding: 15px; white-space: pre-wrap; word-break: break-word; background-color: rgba(255,255,255,0.6); flex-grow: 1; font-family: 'Consolas', 'Monaco', monospace; color: #333; min-height: 80px; max-height: 200px; overflow-y: auto; transition: font-size 0.2s; margin: 0 1px; }
+    .snippet-footer { padding: 10px 15px; background-color: transparent; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); gap: 10px; }
+    .font-controls { display: flex; align-items: center; gap: 4px; background-color: var(--light-gray); padding: 2px 4px; border-radius: 5px; }
+    .font-controls .btn-icon { background-color: #fff; border: 1px solid var(--border-color); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; line-height: 1; }
+    .font-controls .current-font-size { font-size: 12px; font-weight: normal; color: var(--secondary-color); min-width: 30px; text-align: center; }
+    .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.2s, opacity 0.2s; white-space: nowrap; }
+    .btn:not(:last-child) { margin-right: 5px; }
     .btn-primary { background-color: var(--primary-color); color: white; } .btn-primary:hover { background-color: var(--primary-hover); } .btn-success { background-color: var(--success-color); color: white; } .btn-secondary { background-color: var(--secondary-color); color: white; } .btn-danger { background-color: #dc3545; color: white; } .btn-sm { padding: 5px 10px; font-size: 12px; } .btn-icon { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; line-height: 1; } .btn-icon:hover { background-color: rgba(0,0,0,0.1); }
     .category-actions .btn-icon { visibility: hidden; opacity: 0; transition: opacity 0.2s; } .category-item:not(.special-category):hover .category-actions .btn-icon { visibility: visible; opacity: 1; }
-    #no-snippets-message { color: var(--secondary-color); }
+    .color-palette { display: flex; align-items: center; gap: 6px; width: 100%; padding-top: 8px; order: 10; }
+    .color-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active { border-color: var(--primary-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color); }
+    #no-snippets-message { color: var(--secondary-color); text-align: center; margin-top: 40px;}
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.75); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
-
-    /* --- 彈出式視窗 (Modal) (樣式不變) --- */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .modal-overlay.show { opacity: 1; pointer-events: auto; } .modal { background-color: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 500px; transform: scale(0.9); transition: transform 0.3s ease; } .modal-overlay.show .modal { transform: scale(1); }
     .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 1.2em; font-weight: 500; } .modal-body { padding: 20px; } .modal-body input, .modal-body textarea, .modal-body select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; box-sizing: border-box; }
     .modal-body textarea { min-height: 150px; resize: vertical; margin-top: 15px; } .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); text-align: right; }
-    .emoji-picker { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-bottom: 15px; } .emoji-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; border-radius: 4px; transition: background-color 0.2s; } .emoji-btn:hover { background-color: #f0f0f0; }
+    .emoji-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 5px; margin-bottom: 15px; } .emoji-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; border-radius: 4px; transition: background-color 0.2s; } .emoji-btn:hover { background-color: #f0f0f0; }
 </style>
 </head>
 <body>
@@ -164,20 +154,29 @@
     </aside>
 
     <main class="main-content">
-        <button id="sidebar-toggle-btn" class="btn sidebar-toggle-btn">☰</button>
-
         <div class="content-header">
             <h2 id="current-category-title">所有項目</h2>
-            <button id="add-snippet-btn" class="btn btn-primary">新增範本</button>
+            <div class="header-controls">
+                <div class="font-controls">
+                    <span class="font-controls-label">全體字體：</span>
+                    <button id="global-font-decrease-btn" class="btn btn-icon btn-sm" title="縮小全體字體">－</button>
+                    <span id="global-font-size-display" class="current-font-size">14px</span>
+                    <button id="global-font-increase-btn" class="btn btn-icon btn-sm" title="放大全體字體">＋</button>
+                </div>
+                <button id="add-snippet-btn" class="btn btn-primary">新增範本</button>
+            </div>
         </div>
         <div id="snippet-list" class="snippet-list"></div>
         <p id="no-snippets-message" style="display: none;">正在從雲端載入資料...</p>
     </main>
-    
-    <div class="overlay" id="overlay"></div>
 </div>
 
-<div id="category-modal-overlay" class="modal-overlay"> <div class="modal"> <div class="modal-header" id="category-modal-title"></div> <div class="modal-body"> <div id="emoji-picker" class="emoji-picker"></div> <input type="text" id="category-modal-input" placeholder="請輸入分類名稱"> </div> <div class="modal-footer"> <button id="category-modal-cancel" class="btn btn-secondary">取消</button> <button id="category-modal-confirm" class="btn btn-primary">確定</button> </div> </div> </div>
+<button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="開關側邊欄">
+    <span class="icon-open">▶</span>
+    <span class="icon-close">◀</span>
+</button>
+
+<div id="category-modal-overlay" class="modal-overlay"> <div class="modal"> <div class="modal-header" id="category-modal-title"></div> <div class="modal-body"> <div id="emoji-picker" class="emoji-picker"></div> <input type="text" id="category-modal-input" placeholder="請輸入分類名稱 (可包含表情符號)"> </div> <div class="modal-footer"> <button id="category-modal-cancel" class="btn btn-secondary">取消</button> <button id="category-modal-confirm" class="btn btn-primary">確定</button> </div> </div> </div>
 <div id="snippet-modal-overlay" class="modal-overlay"> <div class="modal"> <div class="modal-header" id="snippet-modal-title"></div> <div class="modal-body"> <input type="text" id="snippet-modal-title-input" placeholder="請輸入範本標題"> <textarea id="snippet-modal-content-input" placeholder="請輸入範本內容"></textarea> </div> <div class="modal-footer"> <button id="snippet-modal-cancel" class="btn btn-secondary">取消</button> <button id="snippet-modal-confirm" class="btn btn-primary">確定</button> </div> </div> </div>
 <div id="move-snippet-modal-overlay" class="modal-overlay"> <div class="modal"> <div class="modal-header">移動範本至</div> <div class="modal-body"> <select id="move-snippet-category-select"></select> </div> <div class="modal-footer"> <button id="move-snippet-modal-cancel" class="btn btn-secondary">取消</button> <button id="move-snippet-modal-confirm" class="btn btn-primary">確定</button> </div> </div> </div>
 <input type="file" id="import-file-input" accept=".json" style="display: none;">
@@ -186,12 +185,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <script>
-// JavaScript 邏輯完全不需要修改，因為原有的 setupSidebarToggle() 函式設計得非常好，
-// 它透過切換 .sidebar-open class 來控制狀態，我們的 CSS 修改正是基於這個 class 來實現動畫的。
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Firebase 設定 ---
-    // ▼▼▼▼▼ 請在此貼上您的 Firebase 設定碼 ▼▼▼▼▼
     const firebaseConfig = {
       apiKey: "AIzaSyAlyiXLGareglGA3NE3X-Oupt6OJpZpn1U",
       authDomain: "myonlineclipboard-ce3eb.firebaseapp.com",
@@ -200,16 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
       messagingSenderId: "233956851057",
       appId: "1:233956851057:web:0060206d87bd77ea888ad0"
     };
-    // ▲▲▲▲▲ 請在此貼上您的 Firebase 設定碼 ▲▲▲▲▲
-
+    
     // --- 應用程式初始化 ---
     try {
         firebase.initializeApp(firebaseConfig);
-    } catch (e) {
-        console.error("Firebase 初始化失敗，請檢查設定碼: ", e);
-        alert("Firebase 初始化失敗！請檢查您的設定碼是否已正確貼上。");
-        return;
-    }
+    } catch (e) { console.error("Firebase 初始化失敗: ", e); alert("Firebase 初始化失敗！"); return; }
     
     const db = firebase.firestore();
     const docRef = db.collection("clipboardData").doc("main");
@@ -217,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM 元素定義 ---
     const appContainer = document.getElementById('app-container');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
-    const overlay = document.getElementById('overlay');
     const categoryList = document.getElementById('category-list');
     const snippetList = document.getElementById('snippet-list');
     const currentCategoryTitle = document.getElementById('current-category-title');
@@ -230,120 +220,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const quickAddInput = document.getElementById('quick-add-input');
     const importFileInput = document.getElementById('import-file-input');
     const categoryModalOverlay = document.getElementById('category-modal-overlay'); const categoryModalInput = document.getElementById('category-modal-input'); const categoryModalConfirm = document.getElementById('category-modal-confirm'); const categoryModalCancel = document.getElementById('category-modal-cancel'); const categoryModalTitle = document.getElementById('category-modal-title'); const emojiPicker = document.getElementById('emoji-picker'); const snippetModalOverlay = document.getElementById('snippet-modal-overlay'); const snippetModalTitleInput = document.getElementById('snippet-modal-title-input'); const snippetModalContentInput = document.getElementById('snippet-modal-content-input'); const snippetModalConfirm = document.getElementById('snippet-modal-confirm'); const snippetModalCancel = document.getElementById('snippet-modal-cancel'); const snippetModalTitle = document.getElementById('snippet-modal-title'); const moveSnippetModalOverlay = document.getElementById('move-snippet-modal-overlay'); const moveSnippetCategorySelect = document.getElementById('move-snippet-category-select'); const moveSnippetModalConfirm = document.getElementById('move-snippet-modal-confirm'); const moveSnippetModalCancel = document.getElementById('move-snippet-modal-cancel');
+    const globalFontIncreaseBtn = document.getElementById('global-font-increase-btn');
+    const globalFontDecreaseBtn = document.getElementById('global-font-decrease-btn');
+    const globalFontSizeDisplay = document.getElementById('global-font-size-display');
     
-    // --- 應用程式狀態 (資料模型) ---
+    // --- 應用程式狀態 ---
     let data = [];
     let activeCategoryId = 'all';
+    let globalFontSize = 14;
     const UNCATEGORIZED_ID = 'cat-uncategorized';
+    const PRESET_COLORS = ['#FFFFFF', '#FFF9C4', '#C8E6C9', '#BBDEFB', '#FFCDD2', '#D1C4E9', '#CFD8DC'];
 
-    // --- Firebase 核心功能 ---
-    async function saveData(newData) { 
-        try {
-            await docRef.set({ categories: newData });
-            showToast('💾 資料已同步至雲端');
-        } catch (error) {
-            console.error("儲存資料至 Firebase 時發生錯誤: ", error);
-            alert("儲存失敗！無法連接至雲端資料庫。");
-        }
-    }
-    function setupRealtimeListener() { 
-        docRef.onSnapshot(doc => {
-            if (doc.exists) {
-                const cloudData = doc.data().categories || [];
-                if (!cloudData.find(c => c.id === UNCATEGORIZED_ID)) {
-                    cloudData.push({ id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] });
-                }
-                data = cloudData;
-                noSnippetsMessage.textContent = '這個分類下還沒有任何範本。';
-            } else {
-                console.log("雲端無資料，正在建立初始資料...");
-                const defaultData = [
-                    { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] },
-                    { id: 'cat-1', name: '✏️ 學校用', snippets: [{ id: 'snip-1-1', title: '回家作業格式', content: '國語：\n數學：\n英文：\n其他：' }] },
-                ];
-                data = defaultData;
-                saveData(data);
-            }
-            render();
-        }, error => {
-            console.error("Firebase 監聽器錯誤: ", error);
-            noSnippetsMessage.textContent = '無法連接雲端資料庫，請檢查網路連線或 Firebase 設定。';
-            noSnippetsMessage.style.display = 'block';
-        });
-    }
+    // --- 資料操作函式 ---
+    async function saveData(newData, showToastMsg = true) { try { await docRef.set({ categories: newData }); if(showToastMsg) showToast('💾 資料已同步至雲端'); } catch (error) { console.error("儲存資料至 Firebase 時發生錯誤: ", error); alert("儲存失敗！無法連接至雲端資料庫。"); } }
+    function setupRealtimeListener() { docRef.onSnapshot(doc => { if (doc.exists) { const cloudData = doc.data().categories || []; if (!cloudData.find(c => c.id === UNCATEGORIZED_ID)) { cloudData.push({ id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }); } data = cloudData; } else { const defaultData = [ { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }, { id: 'cat-1', name: '✏️ 學校用', snippets: [{ id: 'snip-1-1', title: '回家作業格式', content: '國語：\n數學：\n英文：\n其他：', color: '#BBDEFB', fontSize: 14 }] }, ]; data = defaultData; saveData(data); } render(); }, error => { console.error("Firebase 監聽器錯誤: ", error); noSnippetsMessage.textContent = '無法連接雲端資料庫，請檢查網路或 Firebase 設定。'; noSnippetsMessage.style.display = 'block'; }); }
+    
+    // --- 核心渲染函式 ---
+    function render() { renderCategories(); renderSnippets(); }
+    
+    function renderCategories() { categoryList.innerHTML = ''; const specialCategories = [{ id: 'all', name: '📑 所有範本' }, { id: UNCATEGORIZED_ID, name: '📂 未分類範本' }]; specialCategories.forEach(cat => { const catData = data.find(c => c.id === cat.id); const count = cat.id === 'all' ? data.reduce((sum, c) => sum + (c.snippets ? c.snippets.length : 0), 0) : catData ? (catData.snippets ? catData.snippets.length : 0) : 0; const li = document.createElement('li'); li.className = `category-item special-category ${cat.id === activeCategoryId ? 'active' : ''}`; li.dataset.id = cat.id; li.innerHTML = `<span class="category-item-name">${escapeHtml(cat.name)} (${count})</span>`; categoryList.appendChild(li); }); const separator = document.createElement('hr'); separator.style.margin = '10px 0'; categoryList.appendChild(separator); data.filter(c => c.id !== UNCATEGORIZED_ID).forEach(category => { const li = document.createElement('li'); li.className = `category-item ${category.id === activeCategoryId ? 'active' : ''}`; li.dataset.id = category.id; li.innerHTML = `<span class="category-item-name">${escapeHtml(category.name)} (${category.snippets ? category.snippets.length : 0})</span><span class="category-actions"><button class="btn-icon edit-cat-btn" title="編輯分類">✏️</button><button class="btn-icon delete-cat-btn" title="刪除分類">🗑️</button></span>`; categoryList.appendChild(li); }); }
 
-    // --- 拖曳排序邏輯 ---
-    function setupDragAndDrop() { 
-        let draggedItemId = null;
-        snippetList.addEventListener('dragstart', e => {
-            const card = e.target.closest('.snippet-card');
-            if (card) {
-                draggedItemId = card.dataset.id;
-                setTimeout(() => card.classList.add('dragging'), 0);
-            }
-        });
-        snippetList.addEventListener('dragend', e => {
-            const card = e.target.closest('.snippet-card');
-            if (card) card.classList.remove('dragging');
-        });
-        snippetList.addEventListener('dragover', e => e.preventDefault());
-        snippetList.addEventListener('drop', e => {
-            e.preventDefault();
-            const targetCard = e.target.closest('.snippet-card');
-            if (!targetCard || targetCard.dataset.id === draggedItemId) return;
-            const category = data.find(c => c.id === activeCategoryId);
-            if (!category) return;
-            const snippetArray = category.snippets;
-            const startIndex = snippetArray.findIndex(s => s.id === draggedItemId);
-            const endIndex = snippetArray.findIndex(s => s.id === targetCard.dataset.id);
-            if (startIndex === -1 || endIndex === -1) return;
-            const [removed] = snippetArray.splice(startIndex, 1);
-            snippetArray.splice(endIndex, 0, removed);
-            saveData(data);
-        });
-    }
-
-    // --- 渲染函式 ---
-    function render() { 
-        renderCategories();
-        renderSnippets();
-    }
-    function renderCategories() { 
-        categoryList.innerHTML = '';
-        const specialCategories = [
-            { id: 'all', name: '📑 所有範本' },
-            { id: UNCATEGORIZED_ID, name: '📂 未分類範本' }
-        ];
-        specialCategories.forEach(cat => {
-            const catData = data.find(c => c.id === cat.id);
-            const count = cat.id === 'all' 
-                ? data.reduce((sum, c) => sum + (c.snippets ? c.snippets.length : 0), 0) 
-                : catData ? (catData.snippets ? catData.snippets.length : 0) : 0;
-            const li = document.createElement('li');
-            li.className = `category-item special-category ${cat.id === activeCategoryId ? 'active' : ''}`;
-            li.dataset.id = cat.id;
-            li.innerHTML = `<span class="category-item-name">${escapeHtml(cat.name)} (${count})</span>`;
-            categoryList.appendChild(li);
-        });
-        categoryList.appendChild(document.createElement('hr'));
-        data.filter(c => c.id !== UNCATEGORIZED_ID).forEach(category => {
-            const li = document.createElement('li');
-            li.className = `category-item ${category.id === activeCategoryId ? 'active' : ''}`;
-            li.dataset.id = category.id;
-            li.innerHTML = `<span class="category-item-name">${escapeHtml(category.name)} (${category.snippets ? category.snippets.length : 0})</span>
-                            <span class="category-actions">
-                                <button class="btn-icon edit-cat-btn" title="編輯分類">✏️</button>
-                                <button class="btn-icon delete-cat-btn" title="刪除分類">🗑️</button>
-                            </span>`;
-            categoryList.appendChild(li);
-        });
-    }
     function renderSnippets() {
         snippetList.innerHTML = '';
-        const searchQuery = searchBox.value.toLowerCase();
         let snippetsToRender = [];
         let categoryName = '';
         let allowDrag = false;
+        const searchQuery = searchBox.value.toLowerCase();
+        
         addSnippetBtn.style.display = 'block';
         if (searchQuery) {
             snippetsToRender = data.flatMap(c => c.snippets || []).filter(s => s.title.toLowerCase().includes(searchQuery) || s.content.toLowerCase().includes(searchQuery));
@@ -359,9 +262,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 snippetsToRender = category.snippets || [];
                 categoryName = category.name;
                 allowDrag = true;
+            } else {
+                activeCategoryId = 'all'; // Fallback if active category is deleted
+                renderSnippets();
+                return;
             }
         }
+        
         currentCategoryTitle.textContent = escapeHtml(categoryName);
+
         if (snippetsToRender.length > 0) {
             noSnippetsMessage.style.display = 'none';
             snippetsToRender.forEach(snippet => {
@@ -369,299 +278,320 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'snippet-card';
                 card.dataset.id = snippet.id;
                 card.draggable = allowDrag;
+                const currentFontSize = snippet.fontSize || globalFontSize;
+                const currentBgColor = snippet.color || '#FFFFFF';
+                card.style.backgroundColor = currentBgColor;
+                const paletteHtml = PRESET_COLORS.map(color => `<button class="color-swatch ${color === currentBgColor ? 'active' : ''}" style="background-color: ${color};" data-color="${color}" title="設定顏色為 ${color}"></button>`).join('');
                 card.innerHTML = `
-                    <div class="snippet-header">
-                        <span class="snippet-title">${escapeHtml(snippet.title)}</span>
-                        <div class="snippet-actions">
-                            <button class="btn btn-sm btn-secondary move-snippet-btn">移動</button>
-                            <button class="btn btn-sm btn-secondary edit-snippet-btn">編輯</button>
-                            <button class="btn btn-sm btn-danger delete-snippet-btn">刪除</button>
-                        </div>
-                    </div>
-                    <div class="snippet-content">${escapeHtml(snippet.content)}</div>
+                    <div class="snippet-header"> <span class="snippet-title">${escapeHtml(snippet.title)}</span> <div class="font-controls"> <button class="btn btn-icon btn-sm font-decrease-btn" title="縮小字體">－</button> <span class="current-font-size">${currentFontSize}px</span> <button class="btn btn-icon btn-sm font-increase-btn" title="放大字體">＋</button> </div> </div>
+                    <div class="snippet-content" style="font-size: ${currentFontSize}px;">${escapeHtml(snippet.content)}</div>
                     <div class="snippet-footer">
+                        <div class="snippet-actions"> <button class="btn btn-sm btn-secondary move-snippet-btn">移動</button> <button class="btn btn-sm btn-secondary edit-snippet-btn">編輯</button> <button class="btn btn-sm btn-danger delete-snippet-btn">刪除</button> </div>
                         <button class="btn btn-success copy-snippet-btn">複製內容</button>
+                        <div class="color-palette">${paletteHtml}</div>
                     </div>`;
                 snippetList.appendChild(card);
             });
         } else {
             noSnippetsMessage.style.display = 'block';
+            noSnippetsMessage.textContent = searchQuery ? '找不到符合條件的範本。' : '這個分類還沒有範本喔！';
         }
     }
     
-    // --- 事件監聽器 ---
-    function setupSidebarToggle() {
-        sidebarToggleBtn.addEventListener('click', () => {
-            appContainer.classList.toggle('sidebar-open');
+    // --- 【⭐功能修復⭐】恢復完整的 Modal 控制模組 ---
+    const modalControls = (() => {
+        let activeCategoryId = null;
+        let activeSnippetId = null;
+        let onConfirmCallback = null;
+
+        const emojis = ['📑', '📂', '✏️', '💡', '💬', '❤️', '⚙️', '🚀', '🎯', '🎉', '💰', '📈', '🔔', '🌍', '🧑‍💻'];
+        emojiPicker.innerHTML = emojis.map(e => `<button class="emoji-btn">${e}</button>`).join('');
+        emojiPicker.addEventListener('click', e => { if(e.target.matches('.emoji-btn')) { categoryModalInput.value += e.target.textContent; categoryModalInput.focus(); } });
+
+        function show(overlay, onShow = () => {}) { overlay.classList.add('show'); onShow(); }
+        function hide(overlay) { overlay.classList.remove('show'); onConfirmCallback = null; }
+
+        categoryModalCancel.addEventListener('click', () => hide(categoryModalOverlay));
+        snippetModalCancel.addEventListener('click', () => hide(snippetModalOverlay));
+        moveSnippetModalCancel.addEventListener('click', () => hide(moveSnippetModalOverlay));
+        
+        categoryModalConfirm.addEventListener('click', () => { if (categoryModalInput.value.trim()) { onConfirmCallback(categoryModalInput.value.trim()); hide(categoryModalOverlay); } });
+        snippetModalConfirm.addEventListener('click', () => { if (snippetModalTitleInput.value.trim() && snippetModalContentInput.value.trim()) { onConfirmCallback({ title: snippetModalTitleInput.value.trim(), content: snippetModalContentInput.value.trim() }); hide(snippetModalOverlay); } });
+        moveSnippetModalConfirm.addEventListener('click', () => { onConfirmCallback(moveSnippetCategorySelect.value); hide(moveSnippetModalOverlay); });
+        
+        return {
+            openCategoryModal(categoryId, callback) {
+                activeCategoryId = categoryId;
+                onConfirmCallback = callback;
+                const isEditing = !!categoryId;
+                categoryModalTitle.textContent = isEditing ? '編輯分類' : '新增分類';
+                categoryModalInput.value = isEditing ? data.find(c => c.id === categoryId).name : '';
+                show(categoryModalOverlay, () => categoryModalInput.focus());
+            },
+            openSnippetModal(snippetInfo, callback) {
+                onConfirmCallback = callback;
+                const isEditing = typeof snippetInfo === 'object' && snippetInfo !== null;
+                snippetModalTitle.textContent = isEditing ? '編輯範本' : '新增範本';
+                snippetModalTitleInput.value = isEditing ? snippetInfo.title : '';
+                snippetModalContentInput.value = isEditing ? snippetInfo.content : '';
+                show(snippetModalOverlay, () => snippetModalTitleInput.focus());
+            },
+            openMoveSnippetModal(snippetId, currentCatId, callback) {
+                activeSnippetId = snippetId;
+                onConfirmCallback = callback;
+                moveSnippetCategorySelect.innerHTML = data
+                    .filter(c => c.id !== currentCatId && c.id !== 'all')
+                    .map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+                show(moveSnippetModalOverlay);
+            }
+        };
+    })();
+
+    // --- 事件監聽器與處理函式 ---
+    function setupEventListeners() {
+        sidebarToggleBtn.addEventListener('click', () => { appContainer.classList.toggle('sidebar-open'); localStorage.setItem('sidebarOpen', appContainer.classList.contains('sidebar-open')); });
+        globalFontIncreaseBtn.addEventListener('click', () => changeGlobalFontSize(true));
+        globalFontDecreaseBtn.addEventListener('click', () => changeGlobalFontSize(false));
+        searchBox.addEventListener('input', renderSnippets);
+        quickAddInput.addEventListener('keydown', handleQuickAdd);
+        
+        // 【⭐功能修復⭐】綁定 Modal 開啟事件
+        addCategoryBtn.addEventListener('click', () => {
+            modalControls.openCategoryModal(null, (name) => {
+                const newCategory = { id: `cat-${Date.now()}`, name, snippets: [] };
+                data.push(newCategory);
+                saveData(data);
+            });
         });
-        overlay.addEventListener('click', () => {
-            appContainer.classList.remove('sidebar-open');
+        
+        addSnippetBtn.addEventListener('click', () => {
+            if (activeCategoryId === 'all') { showToast('❌ 請先選擇一個具體的分類'); return; }
+            modalControls.openSnippetModal(null, (newSnippetData) => {
+                const category = data.find(c => c.id === activeCategoryId);
+                if (category) {
+                    const newSnippet = {
+                        id: `snip-${Date.now()}`,
+                        ...newSnippetData,
+                        fontSize: globalFontSize,
+                        color: '#FFFFFF'
+                    };
+                    category.snippets.unshift(newSnippet);
+                    saveData(data);
+                }
+            });
         });
+
+        categoryList.addEventListener('click', (e) => {
+            const categoryItem = e.target.closest('.category-item');
+            if (!categoryItem) return;
+            const categoryId = categoryItem.dataset.id;
+
+            if (e.target.closest('.edit-cat-btn')) {
+                modalControls.openCategoryModal(categoryId, (newName) => {
+                    const category = data.find(c => c.id === categoryId);
+                    if (category) { category.name = newName; saveData(data); }
+                });
+            } else if (e.target.closest('.delete-cat-btn')) {
+                deleteCategory(categoryId);
+            } else {
+                activeCategoryId = categoryId;
+                searchBox.value = '';
+                render();
+                if (window.innerWidth < 768) { appContainer.classList.remove('sidebar-open'); localStorage.setItem('sidebarOpen', 'false');}
+            }
+        });
+        
+        snippetList.addEventListener('click', (e) => {
+            const card = e.target.closest('.snippet-card');
+            if (!card) return;
+            const snippetId = card.dataset.id;
+            const [category, snippetIndex] = findSnippetLocation(snippetId);
+            if (!category) return;
+            const snippet = category.snippets[snippetIndex];
+            
+            if (e.target.matches('.font-increase-btn, .font-decrease-btn')) {
+                changeSnippetFontSize(snippetId, e.target.matches('.font-increase-btn'));
+            } else if (e.target.matches('.copy-snippet-btn')) {
+                navigator.clipboard.writeText(snippet.content).then(() => showToast('✅ 已複製！'), () => showToast('❌ 複製失敗'));
+            } else if (e.target.matches('.edit-snippet-btn')) {
+                modalControls.openSnippetModal({ title: snippet.title, content: snippet.content }, (updatedData) => {
+                    snippet.title = updatedData.title;
+                    snippet.content = updatedData.content;
+                    saveData(data);
+                });
+            } else if (e.target.matches('.delete-snippet-btn')) {
+                deleteSnippet(snippetId);
+            } else if (e.target.matches('.move-snippet-btn')) {
+                modalControls.openMoveSnippetModal(snippetId, category.id, (targetCatId) => {
+                    const targetCategory = data.find(c => c.id === targetCatId);
+                    if (targetCategory) {
+                        const [removedSnippet] = category.snippets.splice(snippetIndex, 1);
+                        targetCategory.snippets.unshift(removedSnippet);
+                        saveData(data);
+                    }
+                });
+            } else if (e.target.matches('.color-swatch')) {
+                changeSnippetColor(snippetId, e.target.dataset.color);
+            }
+        });
+        
+        // 【⭐功能修復⭐】匯入匯出功能
+        importBtn.addEventListener('click', () => importFileInput.click());
+        importFileInput.addEventListener('change', handleImport);
+        exportBtn.addEventListener('click', handleExport);
     }
     
-    quickAddInput.addEventListener('keydown', e => { 
+    // --- 輔助函式 ---
+    function applyInitialState() {
+        const isSidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
+        if (isSidebarOpen) { appContainer.classList.add('sidebar-open'); }
+        const savedSize = localStorage.getItem('globalFontSize');
+        if (savedSize) { globalFontSize = parseInt(savedSize, 10); }
+        updateGlobalFontSizeDisplay();
+    }
+    
+    function findSnippetLocation(snippetId) { for (const category of data) { if (category.snippets) { const index = category.snippets.findIndex(s => s.id === snippetId); if (index !== -1) return [category, index]; } } return [null, -1]; }
+    
+    // --- 【⭐邏輯修正⭐】全體字體調整 ---
+    function changeGlobalFontSize(increase) {
+        if (increase) {
+            globalFontSize++;
+        } else {
+            globalFontSize = Math.max(8, globalFontSize - 1); // 最小字體 8px
+        }
+        
+        // 遍歷所有分類中的所有範本，強制更新它們的字體大小
+        data.forEach(category => {
+            if (category.snippets) {
+                category.snippets.forEach(snippet => {
+                    snippet.fontSize = globalFontSize;
+                });
+            }
+        });
+        
+        localStorage.setItem('globalFontSize', globalFontSize);
+        updateGlobalFontSizeDisplay();
+        saveData(data, false); // 儲存變更，不顯示提示
+    }
+
+    function updateGlobalFontSizeDisplay() { globalFontSizeDisplay.textContent = `${globalFontSize}px`; }
+
+    function changeSnippetFontSize(snippetId, increase) {
+        const [category, snippetIndex] = findSnippetLocation(snippetId);
+        if (category) {
+            const snippet = category.snippets[snippetIndex];
+            let currentSize = snippet.fontSize || globalFontSize;
+            if (increase) { currentSize++; } else { currentSize = Math.max(8, currentSize - 1); }
+            snippet.fontSize = currentSize;
+            saveData(data, false);
+        }
+    }
+    
+    function changeSnippetColor(snippetId, newColor) {
+        const [category, snippetIndex] = findSnippetLocation(snippetId);
+        if (category) {
+            category.snippets[snippetIndex].color = newColor;
+            saveData(data, false);
+        }
+    }
+    
+    function handleQuickAdd(e) {
         if (e.key === 'Enter' && quickAddInput.value.trim() !== '') {
             e.preventDefault();
             const content = quickAddInput.value.trim();
             let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID);
-            if (!uncategorized) {
+            if (!uncategorized) { // 防呆，如果未分類被刪除則重建
                 uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] };
                 data.push(uncategorized);
             }
             const newSnippet = {
                 id: `snip-${Date.now()}`,
                 title: content.substring(0, 15) + (content.length > 15 ? '...' : ''),
-                content: content
+                content: content,
+                fontSize: globalFontSize,
+                color: '#FFFFFF'
             };
             uncategorized.snippets.unshift(newSnippet);
             quickAddInput.value = '';
             showToast('✅ 快速新增至「未分類」');
             saveData(data);
         }
-    });
-
-    categoryList.addEventListener('click', e => {
-        const categoryItem = e.target.closest('.category-item');
-        if (!categoryItem) return;
-        const categoryId = categoryItem.dataset.id;
-        if (e.target.closest('.edit-cat-btn')) {
-            modalControls.openCategoryModal(categoryId);
-        } else if (e.target.closest('.delete-cat-btn')) {
-            deleteCategory(categoryId);
-        } else {
-            activeCategoryId = categoryId;
-            searchBox.value = '';
-            render();
-            // 在任何裝置上點擊分類後都關閉側邊欄
-            appContainer.classList.remove('sidebar-open');
-        }
-    });
-
-    snippetList.addEventListener('click', e => { 
-        const card = e.target.closest('.snippet-card');
-        if (!card) return;
-        const snippetId = card.dataset.id;
-        if (e.target.matches('.copy-snippet-btn')) {
-            const content = card.querySelector('.snippet-content').innerText;
-            navigator.clipboard.writeText(content).then(() => showToast('✅ 已複製！'), () => showToast('❌ 複製失敗'));
-        } else if (e.target.matches('.edit-snippet-btn')) {
-            modalControls.openSnippetModal(snippetId);
-        } else if (e.target.matches('.delete-snippet-btn')) {
-            deleteSnippet(snippetId);
-        } else if (e.target.matches('.move-snippet-btn')) {
-            modalControls.openMoveSnippetModal(snippetId);
-        }
-    });
-
-    searchBox.addEventListener('input', renderSnippets);
-
-    // --- 資料操作函式 ---
-    function findSnippetLocation(snippetId) { 
-        for (const category of data) {
-            if (category.snippets) {
-                const index = category.snippets.findIndex(s => s.id === snippetId);
-                if (index !== -1) return [category.id, index];
-            }
-        }
-        return [null, -1];
     }
+
     function deleteCategory(categoryId) {
         const category = data.find(c => c.id === categoryId);
         if (!category) return;
         if (confirm(`確定要刪除分類「${category.name}」嗎？\n分類下的所有範本將會被移至「未分類範本」。`)) {
             let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID);
-            if (!uncategorized) {
-                uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] };
-                data.push(uncategorized);
-            }
+            if (!uncategorized) { uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }; data.push(uncategorized); }
             uncategorized.snippets.unshift(...(category.snippets || []));
-            const newData = data.filter(c => c.id !== categoryId);
-            if (activeCategoryId === categoryId) activeCategoryId = UNCATEGORIZED_ID;
-            saveData(newData);
+            data = data.filter(c => c.id !== categoryId);
+            if (activeCategoryId === categoryId) { activeCategoryId = UNCATEGORIZED_ID; }
+            saveData(data);
         }
     }
-    function deleteSnippet(snippetId) { 
+
+    function deleteSnippet(snippetId) {
         if (confirm('確定要刪除這個範本嗎？')) {
-            const [categoryId, snippetIndex] = findSnippetLocation(snippetId);
-            if (categoryId !== null) {
-                const category = data.find(c => c.id === categoryId);
+            const [category, snippetIndex] = findSnippetLocation(snippetId);
+            if (category) {
                 category.snippets.splice(snippetIndex, 1);
                 saveData(data);
             }
         }
     }
-
-    // --- Modal 控制模組 ---
-    const modalControls = (() => {
-        let currentEditingCategoryId = null, currentEditingSnippetId = null, currentMovingSnippetId = null;
-        const commonEmojis = ['✏️', '💼', '📱', '🏠', '❤️', '💡', '✈️', '🚗', '🛒', '🍽️', '🎉', '💬', '📌', '📎', '✅', '❌', '💰', '🔑', '🔗', '📁', '📅', '⏰', '⭐️', 'ℹ️', '❓', '🛠️', '⚙️', '🖥️', '📚', '📦'];
-        emojiPicker.innerHTML = commonEmojis.map(emoji => `<button class="emoji-btn">${emoji}</button>`).join('');
-        function openCategoryModal(categoryId = null) {
-            currentEditingCategoryId = categoryId;
-            if (categoryId) {
-                const category = data.find(c => c.id === categoryId);
-                categoryModalTitle.textContent = '編輯分類';
-                categoryModalInput.value = category.name;
-            } else {
-                categoryModalTitle.textContent = '新增分類';
-                categoryModalInput.value = '';
-            }
-            categoryModalOverlay.classList.add('show');
-            categoryModalInput.focus();
-        }
-        function closeCategoryModal() { categoryModalOverlay.classList.remove('show'); }
-        function openSnippetModal(snippetId = null) {
-            currentEditingSnippetId = snippetId;
-            if (snippetId) {
-                const [categoryId, snippetIndex] = findSnippetLocation(snippetId);
-                const snippet = data.find(c => c.id === categoryId).snippets[snippetIndex];
-                snippetModalTitle.textContent = '編輯範本';
-                snippetModalTitleInput.value = snippet.title;
-                snippetModalContentInput.value = snippet.content;
-            } else {
-                if (!activeCategoryId || activeCategoryId === 'all') {
-                    alert('請先從左側選擇一個要新增範本的分類！'); return;
-                }
-                snippetModalTitle.textContent = '新增範本';
-                snippetModalTitleInput.value = '';
-                snippetModalContentInput.value = '';
-            }
-            snippetModalOverlay.classList.add('show');
-            snippetModalTitleInput.focus();
-        }
-        function closeSnippetModal() { snippetModalOverlay.classList.remove('show'); }
-        function openMoveSnippetModal(snippetId) {
-            currentMovingSnippetId = snippetId;
-            const [currentCatId] = findSnippetLocation(snippetId);
-            moveSnippetCategorySelect.innerHTML = '';
-            data.filter(cat => cat.id !== currentCatId).forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.id;
-                option.textContent = cat.name;
-                moveSnippetCategorySelect.appendChild(option);
-            });
-            moveSnippetModalOverlay.classList.add('show');
-        }
-        function closeMoveSnippetModal() { moveSnippetModalOverlay.classList.remove('show'); }
-        addCategoryBtn.addEventListener('click', () => openCategoryModal());
-        categoryModalCancel.addEventListener('click', closeCategoryModal);
-        emojiPicker.addEventListener('click', e => {
-            if (e.target.classList.contains('emoji-btn')) {
-                categoryModalInput.value += e.target.textContent;
-                categoryModalInput.focus();
-            }
-        });
-        categoryModalConfirm.addEventListener('click', () => {
-            const name = categoryModalInput.value.trim();
-            if (!name) return;
-            if (currentEditingCategoryId) {
-                const category = data.find(c => c.id === currentEditingCategoryId);
-                if (category) category.name = name;
-            } else {
-                const newCategory = { id: `cat-${Date.now()}`, name, snippets: [] };
-                data.push(newCategory);
-                activeCategoryId = newCategory.id;
-            }
-            saveData(data);
-            closeCategoryModal();
-        });
-        addSnippetBtn.addEventListener('click', () => openSnippetModal());
-        snippetModalCancel.addEventListener('click', closeSnippetModal);
-        snippetModalConfirm.addEventListener('click', () => {
-            const title = snippetModalTitleInput.value.trim();
-            const content = snippetModalContentInput.value;
-            if (!title) return;
-            if (currentEditingSnippetId) {
-                const [categoryId, snippetIndex] = findSnippetLocation(currentEditingSnippetId);
-                const snippet = data.find(c => c.id === categoryId).snippets[snippetIndex];
-                snippet.title = title;
-                snippet.content = content;
-                showToast('💾 範本已更新');
-            } else {
-                const newSnippet = { id: `snip-${Date.now()}`, title, content };
-                const category = data.find(c => c.id === activeCategoryId);
-                if (category) category.snippets.unshift(newSnippet);
-                showToast('✅ 範本已新增');
-            }
-            saveData(data);
-            closeSnippetModal();
-        });
-        moveSnippetModalCancel.addEventListener('click', closeMoveSnippetModal);
-        moveSnippetModalConfirm.addEventListener('click', () => {
-            const targetCatId = moveSnippetCategorySelect.value;
-            if (!targetCatId || !currentMovingSnippetId) return;
-            const [sourceCatId, sourceIndex] = findSnippetLocation(currentMovingSnippetId);
-            if(sourceCatId === null) return;
-            const sourceCategory = data.find(c => c.id === sourceCatId);
-            const targetCategory = data.find(c => c.id === targetCatId);
-            const [snippetToMove] = sourceCategory.snippets.splice(sourceIndex, 1);
-            targetCategory.snippets.unshift(snippetToMove);
-            showToast('✅ 範本已移動');
-            saveData(data);
-            closeMoveSnippetModal();
-        });
-        [categoryModalOverlay, snippetModalOverlay, moveSnippetModalOverlay].forEach(overlay => {
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
-        });
-        return { openCategoryModal, openSnippetModal, openMoveSnippetModal };
-    })();
     
-    // --- 匯入/匯出功能 ---
-    exportBtn.addEventListener('click', () => {
-        if(data.length === 0){ showToast("沒有資料可匯出"); return; }
-        const dataStr = JSON.stringify(data.filter(c => c.id !== 'all'), null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `clipboard-backup-${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    function handleImport(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        if (confirm('確定要匯入資料嗎？這將會覆蓋所有雲端上的現有資料。')) {
+                            data = importedData;
+                            saveData(data);
+                            showToast('✅ 資料匯入成功！');
+                        }
+                    } else { throw new Error('Invalid data format'); }
+                } catch (error) { alert('匯入失敗！檔案格式不正確或已損毀。'); }
+            };
+            reader.readAsText(file);
+            importFileInput.value = ''; // 重置 input，允許再次選擇同一個檔案
+        }
+    }
+
+    function handleExport() {
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        const timestamp = new Date().toISOString().slice(0, 10);
+        link.download = `雲教室剪貼簿備份_${timestamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        showToast('✅ 資料已匯出');
-    });
-    importBtn.addEventListener('click', () => importFileInput.click());
-    importFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const importedData = JSON.parse(event.target.result);
-                if (Array.isArray(importedData) && importedData.every(c => c.id && c.name && Array.isArray(c.snippets))) {
-                    if (confirm('確定要匯入新的資料嗎？這將會覆蓋您目前的雲端資料！')) {
-                        activeCategoryId = 'all';
-                        saveData(importedData);
-                        showToast('✅ 資料已上傳至雲端！');
-                    }
-                } else { throw new Error('Invalid file format'); }
-            } catch (error) {
-                alert('匯入失敗！請確認檔案是正確的 JSON 格式。');
-                console.error('Import failed:', error);
-            } finally {
-                importFileInput.value = '';
-            }
-        };
-        reader.readAsText(file);
-    });
+        showToast('✅ 資料匯出成功！');
+    }
+    
+    function setupDragAndDrop() { let draggedItemId = null; snippetList.addEventListener('dragstart', e => { const card = e.target.closest('.snippet-card'); if (card) { draggedItemId = card.dataset.id; setTimeout(() => card.classList.add('dragging'), 0); } }); snippetList.addEventListener('dragend', e => { const card = e.target.closest('.snippet-card'); if (card) card.classList.remove('dragging'); }); snippetList.addEventListener('dragover', e => e.preventDefault()); snippetList.addEventListener('drop', e => { e.preventDefault(); const targetCard = e.target.closest('.snippet-card'); if (!targetCard || targetCard.dataset.id === draggedItemId) return; const category = data.find(c => c.id === activeCategoryId); if (!category) return; const snippetArray = category.snippets; const startIndex = snippetArray.findIndex(s => s.id === draggedItemId); const endIndex = snippetArray.findIndex(s => s.id === targetCard.dataset.id); if (startIndex === -1 || endIndex === -1) return; const [removed] = snippetArray.splice(startIndex, 1); snippetArray.splice(endIndex, 0, removed); saveData(data); }); }
+    function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); } function showToast(message) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(-10px)'; }, 10); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(0)'; setTimeout(() => toast.remove(), 300); }, 2000); }
 
-    // --- 工具函式 ---
-    function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
-    function showToast(message) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(-10px)'; }, 10); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(0)'; setTimeout(() => toast.remove(), 300); }, 2000); }
-
-    // --- 啟動應用 ---
-    if (firebaseConfig.apiKey.startsWith("AIzaSyA") && firebaseConfig.apiKey.length > 35) {
-      // 簡易檢查 apiKey 是否有填寫
-    } else {
+    // --- 應用程式啟動 ---
+    if (!firebaseConfig.apiKey || !firebaseConfig.apiKey.startsWith("AIza")) {
         alert("錯誤：請先在程式碼中貼上您的 Firebase 設定碼 (firebaseConfig)！");
         noSnippetsMessage.textContent = 'Firebase 尚未設定。請依照說明文件設定後重新整理頁面。';
         noSnippetsMessage.style.display = 'block';
         return;
     }
+    
+    applyInitialState();
+    setupEventListeners();
     setupRealtimeListener();
     setupDragAndDrop();
-    setupSidebarToggle();
 });
 </script>
 
