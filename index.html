@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雲教室文字剪貼簿V2</title>
+<title>雲教室文字剪貼簿V3</title>
 <style>
     /* --- 全域設計變數 --- */
     :root {
@@ -34,7 +34,6 @@
     
     /* --- 側邊欄佈局與動畫 --- */
     .sidebar { 
-        /* 【⭐CSS 修改⭐】新增 position: relative 作為按鈕的定位基準 */
         position: relative; 
         width: var(--sidebar-width); 
         min-width: 280px; 
@@ -62,18 +61,14 @@
         box-sizing: border-box;
     }
     
-    /* --- 【⭐CSS 大幅修改⭐】側邊欄開關按鈕樣式與定位 --- */
+    /* --- 側邊欄開關按鈕 --- */
     .sidebar-toggle-btn {
-        position: absolute; /* 改為絕對定位，相對於 sidebar */
+        position: absolute;
         top: 50%;
-        left: 100%; /* 定位在 sidebar 的右邊緣線上 */
-        
-        /* 將按鈕本身寬度的一半向左移，使其中心對準邊線 */
+        left: 100%;
         transform: translate(-50%, -50%); 
         z-index: 101;
-        
-        /* 外觀設計 */
-        width: 30px; /* 稍微加寬以容納更大的圖示 */
+        width: 30px;
         height: 70px;
         padding: 0;
         border: 1px solid var(--border-color);
@@ -85,48 +80,63 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        
-        /* --- 您可以在此調整圖示大小 --- */
         font-size: 50px; 
     }
     .sidebar-toggle-btn:hover { 
         background-color: white;
         box-shadow: 3px 0 8px rgba(0,0,0,0.15);
     }
-    
-    /* 當 sidebar-open 時，控制圖示的顯示與隱藏 (邏輯不變) */
-    .sidebar-toggle-btn .icon-open,
-    .sidebar-toggle-btn .icon-close {
-        transition: opacity 0.2s;
-    }
+    .sidebar-toggle-btn .icon-open, .sidebar-toggle-btn .icon-close { transition: opacity 0.2s; }
     .sidebar-toggle-btn .icon-close { display: none; }
-
     .container.sidebar-open .sidebar-toggle-btn .icon-open { display: none; }
     .container.sidebar-open .sidebar-toggle-btn .icon-close { display: inline; }
 
-
-    /* --- 其餘樣式保持不變 --- */
-    .sidebar-header { padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
-    .quick-add-container {
+    /* --- 【CSS 新增】使用者驗證區塊 --- */
+    #auth-container {
+        padding: 10px;
+        border-bottom: 1px solid var(--border-color);
+        margin: -15px -15px 15px -15px; /* 上下左右貼齊 sidebar padding */
+        background-color: #f8f9fa;
+        text-align: center;
+    }
+    #user-profile {
         display: flex;
-        gap: 8px;
-        margin-bottom: 15px;
         align-items: center;
+        justify-content: space-between;
+        gap: 10px;
     }
-    #quick-add-input {
-        flex-grow: 1;
-        width: auto;
-        padding: 10px 12px;
-        border-radius: 5px;
-        border: 1px solid var(--border-color);
-        font-size: 16px;
-        box-sizing: border-box;
+    #user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow: hidden;
     }
-    #quick-add-btn {
+    #user-pic {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
         flex-shrink: 0;
-        padding: 8px 12px;
-        line-height: 1.2;
     }
+    #user-name {
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #login-btn, #logout-btn {
+        width: 100%;
+    }
+    .hidden {
+        display: none !important;
+    }
+
+
+    /* --- 其餘樣式 --- */
+    .sidebar-header { padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .quick-add-container { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; }
+    #quick-add-input { flex-grow: 1; width: auto; padding: 10px 12px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 16px; box-sizing: border-box; }
+    #quick-add-btn { flex-shrink: 0; padding: 8px 12px; line-height: 1.2; }
     .search-box { width: 100%; padding: 8px 12px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
     .category-controls { display: flex; justify-content: space-between; }
     .category-list { list-style: none; padding: 0; margin-top: 15px; overflow-y: auto; flex-grow: 1; }
@@ -170,6 +180,17 @@
 
 <div class="container" id="app-container">
     <aside class="sidebar">
+        <div id="auth-container">
+            <div id="user-profile" class="hidden">
+                <div id="user-info">
+                    <img id="user-pic" src="" alt="User photo">
+                    <span id="user-name"></span>
+                </div>
+                <button id="logout-btn" class="btn btn-secondary btn-sm">登出</button>
+            </div>
+            <button id="login-btn" class="btn btn-primary">使用 Google 登入以編輯</button>
+        </div>
+
         <div class="sidebar-header">
             <div class="quick-add-container">
                 <input type="text" id="quick-add-input" placeholder="快速新增範本...">
@@ -216,13 +237,13 @@
 <input type="file" id="import-file-input" accept=".json" style="display: none;">
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script>
-// JavaScript 邏輯完全不需要修改，因為 DOM 元素的 ID 和 class 的切換邏輯都保持一致。
-// 這裡貼上完整的 JS 程式碼以確保檔案的完整性。
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Firebase 設定 ---
+    // ⭐⭐⭐ 請務必在此處貼上您自己的 Firebase 專案設定碼！ ⭐⭐⭐
     const firebaseConfig = {
       apiKey: "AIzaSyCCVwJOEabrF05MEez7zzLMGKxGMZAe1xE",
   authDomain: "cloud-clipboard-app.firebaseapp.com",
@@ -237,10 +258,19 @@ document.addEventListener('DOMContentLoaded', () => {
         firebase.initializeApp(firebaseConfig);
     } catch (e) { console.error("Firebase 初始化失敗: ", e); alert("Firebase 初始化失敗！"); return; }
     
+    // 【JS 修改】新增 auth 服務
+    const auth = firebase.auth();
     const db = firebase.firestore();
     const docRef = db.collection("clipboardData").doc("main");
 
     // --- DOM 元素定義 ---
+    // 【JS 新增】Auth 相關的 DOM 元素
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userProfile = document.getElementById('user-profile');
+    const userName = document.getElementById('user-name');
+    const userPic = document.getElementById('user-pic');
+
     const appContainer = document.getElementById('app-container');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
     const categoryList = document.getElementById('category-list');
@@ -264,12 +294,91 @@ document.addEventListener('DOMContentLoaded', () => {
     let data = [];
     let activeCategoryId = 'all';
     let globalFontSize = 14;
+    let currentUser = null; // 【JS 新增】用來儲存當前使用者狀態
     const UNCATEGORIZED_ID = 'cat-uncategorized';
     const PRESET_COLORS = ['#FFFFFF', '#FFF9C4', '#C8E6C9', '#BBDEFB', '#FFCDD2', '#D1C4E9', '#CFD8DC'];
 
+    // --- 【JS 新增】使用者驗證相關函式 ---
+    function setupAuthObserver() {
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                // 使用者已登入
+                userProfile.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+                userName.textContent = user.displayName;
+                userPic.src = user.photoURL;
+                setEditingEnabled(true);
+            } else {
+                // 使用者已登出
+                userProfile.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                setEditingEnabled(false);
+            }
+        });
+    }
+
+    function signIn() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(error => {
+            console.error("登入失敗:", error);
+            alert("登入失敗，請檢查彈出視窗是否被阻擋，或稍後再試。");
+        });
+    }
+
+    function signOut() {
+        auth.signOut();
+    }
+    
+    // --- 【JS 新增】權限控制函式 ---
+    function setEditingEnabled(isLoggedIn) {
+        // 選擇所有需要權限的按鈕和輸入框
+        const restrictedElements = [
+            quickAddInput, quickAddBtn, addCategoryBtn, importBtn, addSnippetBtn,
+            ...document.querySelectorAll('.edit-cat-btn'),
+            ...document.querySelectorAll('.delete-cat-btn'),
+            ...document.querySelectorAll('.move-snippet-btn'),
+            ...document.querySelectorAll('.edit-snippet-btn'),
+            ...document.querySelectorAll('.delete-snippet-btn'),
+            ...document.querySelectorAll('.color-swatch'),
+            ...document.querySelectorAll('.font-increase-btn'),
+            ...document.querySelectorAll('.font-decrease-btn'),
+            ...document.querySelectorAll('.global-font-controls')
+        ];
+        
+        restrictedElements.forEach(el => {
+            if (el) {
+                el.style.display = isLoggedIn ? '' : 'none';
+            }
+        });
+
+        // 處理一些特殊情況，例如 flex 容器
+        document.querySelectorAll('.category-actions, .snippet-actions').forEach(el => {
+             el.style.display = isLoggedIn ? '' : 'none';
+        });
+
+        // 更新輸入框的 placeholder 文字
+        if (quickAddInput) {
+            quickAddInput.placeholder = isLoggedIn ? '快速新增範本...' : '登入後即可新增';
+            quickAddInput.disabled = !isLoggedIn;
+        }
+
+        // 讓卡片在登入時才能拖曳
+        document.querySelectorAll('.snippet-card').forEach(card => {
+            card.draggable = isLoggedIn;
+        });
+    }
+
+
     // --- 資料操作函式 ---
-    async function saveData(newData, showToastMsg = true) { try { await docRef.set({ categories: newData }); if(showToastMsg) showToast('💾 資料已同步至雲端'); } catch (error) { console.error("儲存資料至 Firebase 時發生錯誤: ", error); alert("儲存失敗！無法連接至雲端資料庫。"); } }
-    function setupRealtimeListener() { docRef.onSnapshot(doc => { if (doc.exists) { const cloudData = doc.data().categories || []; if (!cloudData.find(c => c.id === UNCATEGORIZED_ID)) { cloudData.push({ id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }); } data = cloudData; } else { const defaultData = [ { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }, { id: 'cat-1', name: '✏️ 學校用', snippets: [{ id: 'snip-1-1', title: '回家作業格式', content: '國語：\n數學：\n英文：\n其他：', color: '#BBDEFB', fontSize: 14 }] }, ]; data = defaultData; saveData(data); } render(); }, error => { console.error("Firebase 監聽器錯誤: ", error); noSnippetsMessage.textContent = '無法連接雲端資料庫，請檢查網路或 Firebase 設定。'; noSnippetsMessage.style.display = 'block'; }); }
+    async function saveData(newData, showToastMsg = true) { 
+        if (!currentUser) { 
+            showToast('⚠️ 請先登入才能修改資料');
+            return;
+        }
+        try { await docRef.set({ categories: newData }); if(showToastMsg) showToast('💾 資料已同步至雲端'); } catch (error) { console.error("儲存資料至 Firebase 時發生錯誤: ", error); showToast("❌ 儲存失敗！權限不足或網路錯誤。"); } 
+    }
+    function setupRealtimeListener() { docRef.onSnapshot(doc => { if (doc.exists) { const cloudData = doc.data().categories || []; if (!cloudData.find(c => c.id === UNCATEGORIZED_ID)) { cloudData.push({ id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }); } data = cloudData; } else { const defaultData = [ { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }, { id: 'cat-1', name: '✏️ 學校用', snippets: [{ id: 'snip-1-1', title: '回家作業格式', content: '國語：\n數學：\n英文：\n其他：', color: '#BBDEFB', fontSize: 14 }] }, ]; data = defaultData; if (currentUser) { saveData(data); } } render(); }, error => { console.error("Firebase 監聽器錯誤: ", error); noSnippetsMessage.textContent = '無法連接雲端資料庫，請檢查網路或 Firebase 設定。'; noSnippetsMessage.style.display = 'block'; }); }
     
     // --- 核心渲染函式 ---
     function render() { renderCategories(); renderSnippets(); }
@@ -278,29 +387,20 @@ document.addEventListener('DOMContentLoaded', () => {
         snippetList.innerHTML = '';
         let snippetsToRender = [];
         let categoryName = '';
-        let allowDrag = false;
         const searchQuery = searchBox.value.toLowerCase();
         
-        addSnippetBtn.style.display = 'block';
         if (searchQuery) {
             snippetsToRender = data.flatMap(c => c.snippets || []).filter(s => s.title.toLowerCase().includes(searchQuery) || s.content.toLowerCase().includes(searchQuery));
             categoryName = `搜尋結果: "${searchQuery}"`;
-            addSnippetBtn.style.display = 'none';
         } else if (activeCategoryId === 'all') {
             snippetsToRender = data.flatMap(c => c.snippets || []);
             categoryName = '所有範本';
-            addSnippetBtn.style.display = 'none';
         } else {
             const category = data.find(c => c.id === activeCategoryId);
             if (category) {
                 snippetsToRender = category.snippets || [];
                 categoryName = category.name;
-                allowDrag = true;
-            } else {
-                activeCategoryId = 'all'; 
-                renderSnippets();
-                return;
-            }
+            } else { activeCategoryId = 'all'; renderSnippets(); return; }
         }
         
         currentCategoryTitle.textContent = escapeHtml(categoryName);
@@ -311,11 +411,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'snippet-card';
                 card.dataset.id = snippet.id;
-                card.draggable = allowDrag;
+                //卡片是否可拖曳的權限，由 setEditingEnabled 控制
                 const currentFontSize = snippet.fontSize || globalFontSize;
                 const currentBgColor = snippet.color || '#FFFFFF';
                 card.style.backgroundColor = currentBgColor;
-                const paletteHtml = PRESET_COLORS.map(color => `<button class="color-swatch ${color === currentBgColor ? 'active' : ''}" style="background-color: ${color};" data-color="${color}" title="設定顏色為 ${color}"></button>`).join('');
+                const paletteHtml = PRESET_COLORS.map(color => `<button class="color-swatch" style="background-color: ${color}; ${color === currentBgColor ? 'border-color: var(--primary-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);' : ''}" data-color="${color}" title="設定顏色為 ${color}"></button>`).join('');
                 card.innerHTML = `
                     <div class="snippet-header"> <span class="snippet-title">${escapeHtml(snippet.title)}</span> <div class="font-controls"> <button class="btn btn-icon btn-sm font-decrease-btn" title="縮小字體">－</button> <span class="current-font-size">${currentFontSize}px</span> <button class="btn btn-icon btn-sm font-increase-btn" title="放大字體">＋</button> </div> </div>
                     <div class="snippet-content" style="font-size: ${currentFontSize}px;">${escapeHtml(snippet.content)}</div>
@@ -330,296 +430,52 @@ document.addEventListener('DOMContentLoaded', () => {
             noSnippetsMessage.style.display = 'block';
             noSnippetsMessage.textContent = searchQuery ? '找不到符合條件的範本。' : '這個分類還沒有範本喔！';
         }
+        // 【JS 修改】每次渲染後，根據登入狀態更新 UI 權限
+        setEditingEnabled(!!currentUser);
     }
     
-    // --- Modal 控制模組 ---
-    const modalControls = (() => {
-        let activeCategoryId = null;
-        let activeSnippetId = null;
-        let onConfirmCallback = null;
-
-        const emojis = ['📑', '📂', '✏️', '💡', '💬', '❤️', '⚙️', '🚀', '🎯', '🎉', '💰', '📈', '🔔', '🌍', '🧑‍💻'];
-        emojiPicker.innerHTML = emojis.map(e => `<button class="emoji-btn">${e}</button>`).join('');
-        emojiPicker.addEventListener('click', e => { if(e.target.matches('.emoji-btn')) { categoryModalInput.value += e.target.textContent; categoryModalInput.focus(); } });
-
-        function show(overlay, onShow = () => {}) { overlay.classList.add('show'); onShow(); }
-        function hide(overlay) { overlay.classList.remove('show'); onConfirmCallback = null; }
-
-        categoryModalCancel.addEventListener('click', () => hide(categoryModalOverlay));
-        snippetModalCancel.addEventListener('click', () => hide(snippetModalOverlay));
-        moveSnippetModalCancel.addEventListener('click', () => hide(moveSnippetModalOverlay));
-        
-        categoryModalConfirm.addEventListener('click', () => { if (categoryModalInput.value.trim()) { onConfirmCallback(categoryModalInput.value.trim()); hide(categoryModalOverlay); } });
-        snippetModalConfirm.addEventListener('click', () => { if (snippetModalTitleInput.value.trim() && snippetModalContentInput.value.trim()) { onConfirmCallback({ title: snippetModalTitleInput.value.trim(), content: snippetModalContentInput.value.trim() }); hide(snippetModalOverlay); } });
-        moveSnippetModalConfirm.addEventListener('click', () => { onConfirmCallback(moveSnippetCategorySelect.value); hide(moveSnippetModalOverlay); });
-        
-        return {
-            openCategoryModal(categoryId, callback) {
-                activeCategoryId = categoryId;
-                onConfirmCallback = callback;
-                const isEditing = !!categoryId;
-                categoryModalTitle.textContent = isEditing ? '編輯分類' : '新增分類';
-                categoryModalInput.value = isEditing ? data.find(c => c.id === categoryId).name : '';
-                show(categoryModalOverlay, () => categoryModalInput.focus());
-            },
-            openSnippetModal(snippetInfo, callback) {
-                onConfirmCallback = callback;
-                const isEditing = typeof snippetInfo === 'object' && snippetInfo !== null;
-                snippetModalTitle.textContent = isEditing ? '編輯範本' : '新增範本';
-                snippetModalTitleInput.value = isEditing ? snippetInfo.title : '';
-                snippetModalContentInput.value = isEditing ? snippetInfo.content : '';
-                show(snippetModalOverlay, () => snippetModalTitleInput.focus());
-            },
-            openMoveSnippetModal(snippetId, currentCatId, callback) {
-                activeSnippetId = snippetId;
-                onConfirmCallback = callback;
-                moveSnippetCategorySelect.innerHTML = data
-                    .filter(c => c.id !== currentCatId && c.id !== 'all')
-                    .map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-                show(moveSnippetModalOverlay);
-            }
-        };
-    })();
+    // --- Modal 控制模組 (內部邏輯不變) ---
+    const modalControls = (() => { let activeCategoryId = null; let activeSnippetId = null; let onConfirmCallback = null; const emojis = ['📑', '📂', '✏️', '💡', '💬', '❤️', '⚙️', '🚀', '🎯', '🎉', '💰', '📈', '🔔', '🌍', '🧑‍💻']; emojiPicker.innerHTML = emojis.map(e => `<button class="emoji-btn">${e}</button>`).join(''); emojiPicker.addEventListener('click', e => { if(e.target.matches('.emoji-btn')) { categoryModalInput.value += e.target.textContent; categoryModalInput.focus(); } }); function show(overlay, onShow = () => {}) { overlay.classList.add('show'); onShow(); } function hide(overlay) { overlay.classList.remove('show'); onConfirmCallback = null; } categoryModalCancel.addEventListener('click', () => hide(categoryModalOverlay)); snippetModalCancel.addEventListener('click', () => hide(snippetModalOverlay)); moveSnippetModalCancel.addEventListener('click', () => hide(moveSnippetModalOverlay)); categoryModalConfirm.addEventListener('click', () => { if (categoryModalInput.value.trim()) { onConfirmCallback(categoryModalInput.value.trim()); hide(categoryModalOverlay); } }); snippetModalConfirm.addEventListener('click', () => { if (snippetModalTitleInput.value.trim() && snippetModalContentInput.value.trim()) { onConfirmCallback({ title: snippetModalTitleInput.value.trim(), content: snippetModalContentInput.value.trim() }); hide(snippetModalOverlay); } }); moveSnippetModalConfirm.addEventListener('click', () => { onConfirmCallback(moveSnippetCategorySelect.value); hide(moveSnippetModalOverlay); }); return { openCategoryModal(categoryId, callback) { activeCategoryId = categoryId; onConfirmCallback = callback; const isEditing = !!categoryId; categoryModalTitle.textContent = isEditing ? '編輯分類' : '新增分類'; categoryModalInput.value = isEditing ? data.find(c => c.id === categoryId).name : ''; show(categoryModalOverlay, () => categoryModalInput.focus()); }, openSnippetModal(snippetInfo, callback) { onConfirmCallback = callback; const isEditing = typeof snippetInfo === 'object' && snippetInfo !== null; snippetModalTitle.textContent = isEditing ? '編輯範本' : '新增範本'; snippetModalTitleInput.value = isEditing ? snippetInfo.title : ''; snippetModalContentInput.value = isEditing ? snippetInfo.content : ''; show(snippetModalOverlay, () => snippetModalTitleInput.focus()); }, openMoveSnippetModal(snippetId, currentCatId, callback) { activeSnippetId = snippetId; onConfirmCallback = callback; moveSnippetCategorySelect.innerHTML = data.filter(c => c.id !== currentCatId && c.id !== 'all').map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join(''); show(moveSnippetModalOverlay); } }; })();
 
     // --- 事件監聽器設置 ---
     function setupEventListeners() {
+        // 【JS 新增】登入登出按鈕事件
+        loginBtn.addEventListener('click', signIn);
+        logoutBtn.addEventListener('click', signOut);
+
         sidebarToggleBtn.addEventListener('click', () => { appContainer.classList.toggle('sidebar-open'); localStorage.setItem('sidebarOpen', appContainer.classList.contains('sidebar-open')); });
         globalFontIncreaseBtn.addEventListener('click', () => changeGlobalFontSize(true));
         globalFontDecreaseBtn.addEventListener('click', () => changeGlobalFontSize(false));
         searchBox.addEventListener('input', renderSnippets);
-        
-        quickAddInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault(); 
-                handleQuickAdd();
-            }
-        });
+        quickAddInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAdd(); } });
         quickAddBtn.addEventListener('click', handleQuickAdd);
-        
-        addCategoryBtn.addEventListener('click', () => {
-            modalControls.openCategoryModal(null, (name) => {
-                const newCategory = { id: `cat-${Date.now()}`, name, snippets: [] };
-                data.push(newCategory);
-                saveData(data);
-            });
-        });
-        
-        addSnippetBtn.addEventListener('click', () => {
-            if (activeCategoryId === 'all') { showToast('❌ 請先選擇一個具體的分類'); return; }
-            modalControls.openSnippetModal(null, (newSnippetData) => {
-                const category = data.find(c => c.id === activeCategoryId);
-                if (category) {
-                    const newSnippet = {
-                        id: `snip-${Date.now()}`,
-                        ...newSnippetData,
-                        fontSize: globalFontSize,
-                        color: '#FFFFFF'
-                    };
-                    category.snippets.unshift(newSnippet);
-                    saveData(data);
-                }
-            });
-        });
-
-        categoryList.addEventListener('click', (e) => {
-            const categoryItem = e.target.closest('.category-item');
-            if (!categoryItem) return;
-            const categoryId = categoryItem.dataset.id;
-
-            if (e.target.closest('.edit-cat-btn')) {
-                modalControls.openCategoryModal(categoryId, (newName) => {
-                    const category = data.find(c => c.id === categoryId);
-                    if (category) { category.name = newName; saveData(data); }
-                });
-            } else if (e.target.closest('.delete-cat-btn')) {
-                deleteCategory(categoryId);
-            } else {
-                activeCategoryId = categoryId;
-                searchBox.value = '';
-                render();
-                if (window.innerWidth < 768) { appContainer.classList.remove('sidebar-open'); localStorage.setItem('sidebarOpen', 'false');}
-            }
-        });
-        
-        snippetList.addEventListener('click', (e) => {
-            const card = e.target.closest('.snippet-card');
-            if (!card) return;
-            const snippetId = card.dataset.id;
-            const [category, snippetIndex] = findSnippetLocation(snippetId);
-            if (!category) return;
-            const snippet = category.snippets[snippetIndex];
-            
-            if (e.target.matches('.font-increase-btn, .font-decrease-btn')) {
-                changeSnippetFontSize(snippetId, e.target.matches('.font-increase-btn'));
-            } else if (e.target.matches('.copy-snippet-btn')) {
-                navigator.clipboard.writeText(snippet.content).then(() => showToast('✅ 已複製！'), () => showToast('❌ 複製失敗'));
-            } else if (e.target.matches('.edit-snippet-btn')) {
-                modalControls.openSnippetModal({ title: snippet.title, content: snippet.content }, (updatedData) => {
-                    snippet.title = updatedData.title;
-                    snippet.content = updatedData.content;
-                    saveData(data);
-                });
-            } else if (e.target.matches('.delete-snippet-btn')) {
-                deleteSnippet(snippetId);
-            } else if (e.target.matches('.move-snippet-btn')) {
-                modalControls.openMoveSnippetModal(snippetId, category.id, (targetCatId) => {
-                    const targetCategory = data.find(c => c.id === targetCatId);
-                    if (targetCategory) {
-                        const [removedSnippet] = category.snippets.splice(snippetIndex, 1);
-                        targetCategory.snippets.unshift(removedSnippet);
-                        saveData(data);
-                    }
-                });
-            } else if (e.target.matches('.color-swatch')) {
-                changeSnippetColor(snippetId, e.target.dataset.color);
-            }
-        });
-        
+        addCategoryBtn.addEventListener('click', () => { modalControls.openCategoryModal(null, (name) => { const newCategory = { id: `cat-${Date.now()}`, name, snippets: [] }; data.push(newCategory); saveData(data); }); });
+        addSnippetBtn.addEventListener('click', () => { if (activeCategoryId === 'all') { showToast('❌ 請先選擇一個具體的分類'); return; } modalControls.openSnippetModal(null, (newSnippetData) => { const category = data.find(c => c.id === activeCategoryId); if (category) { const newSnippet = { id: `snip-${Date.now()}`, ...newSnippetData, fontSize: globalFontSize, color: '#FFFFFF' }; category.snippets.unshift(newSnippet); saveData(data); } }); });
+        categoryList.addEventListener('click', (e) => { const categoryItem = e.target.closest('.category-item'); if (!categoryItem) return; const categoryId = categoryItem.dataset.id; if (e.target.closest('.edit-cat-btn')) { modalControls.openCategoryModal(categoryId, (newName) => { const category = data.find(c => c.id === categoryId); if (category) { category.name = newName; saveData(data); } }); } else if (e.target.closest('.delete-cat-btn')) { deleteCategory(categoryId); } else { activeCategoryId = categoryId; searchBox.value = ''; render(); if (window.innerWidth < 768) { appContainer.classList.remove('sidebar-open'); localStorage.setItem('sidebarOpen', 'false');} } });
+        snippetList.addEventListener('click', (e) => { const card = e.target.closest('.snippet-card'); if (!card) return; const snippetId = card.dataset.id; const [category, snippetIndex] = findSnippetLocation(snippetId); if (!category) return; const snippet = category.snippets[snippetIndex]; if (e.target.matches('.font-increase-btn, .font-decrease-btn')) { changeSnippetFontSize(snippetId, e.target.matches('.font-increase-btn')); } else if (e.target.matches('.copy-snippet-btn')) { navigator.clipboard.writeText(snippet.content).then(() => showToast('✅ 已複製！'), () => showToast('❌ 複製失敗')); } else if (e.target.matches('.edit-snippet-btn')) { modalControls.openSnippetModal({ title: snippet.title, content: snippet.content }, (updatedData) => { snippet.title = updatedData.title; snippet.content = updatedData.content; saveData(data); }); } else if (e.target.matches('.delete-snippet-btn')) { deleteSnippet(snippetId); } else if (e.target.matches('.move-snippet-btn')) { modalControls.openMoveSnippetModal(snippetId, category.id, (targetCatId) => { const targetCategory = data.find(c => c.id === targetCatId); if (targetCategory) { const [removedSnippet] = category.snippets.splice(snippetIndex, 1); targetCategory.snippets.unshift(removedSnippet); saveData(data); } }); } else if (e.target.matches('.color-swatch')) { changeSnippetColor(snippetId, e.target.dataset.color); } });
         importBtn.addEventListener('click', () => importFileInput.click());
         importFileInput.addEventListener('change', handleImport);
         exportBtn.addEventListener('click', handleExport);
     }
     
-    // --- 輔助函式 ---
-    function applyInitialState() {
-        const isSidebarOpen = localStorage.getItem('sidebarOpen') === 'true';
-        if (isSidebarOpen) { appContainer.classList.add('sidebar-open'); }
-        const savedSize = localStorage.getItem('globalFontSize');
-        if (savedSize) { globalFontSize = parseInt(savedSize, 10); }
-        updateGlobalFontSizeDisplay();
-    }
-    
+    // --- 輔助函式 (部分修改以適應權限) ---
+    function applyInitialState() { const isSidebarOpen = localStorage.getItem('sidebarOpen') === 'true'; if (isSidebarOpen) { appContainer.classList.add('sidebar-open'); } const savedSize = localStorage.getItem('globalFontSize'); if (savedSize) { globalFontSize = parseInt(savedSize, 10); } updateGlobalFontSizeDisplay(); }
     function findSnippetLocation(snippetId) { for (const category of data) { if (category.snippets) { const index = category.snippets.findIndex(s => s.id === snippetId); if (index !== -1) return [category, index]; } } return [null, -1]; }
-    
-    function changeGlobalFontSize(increase) {
-        if (increase) {
-            globalFontSize++;
-        } else {
-            globalFontSize = Math.max(8, globalFontSize - 1);
-        }
-        data.forEach(category => {
-            if (category.snippets) {
-                category.snippets.forEach(snippet => {
-                    snippet.fontSize = globalFontSize;
-                });
-            }
-        });
-        localStorage.setItem('globalFontSize', globalFontSize);
-        updateGlobalFontSizeDisplay();
-        saveData(data, false);
-    }
-
+    function changeGlobalFontSize(increase) { if (increase) { globalFontSize++; } else { globalFontSize = Math.max(8, globalFontSize - 1); } data.forEach(category => { if (category.snippets) { category.snippets.forEach(snippet => { snippet.fontSize = globalFontSize; }); } }); localStorage.setItem('globalFontSize', globalFontSize); updateGlobalFontSizeDisplay(); saveData(data, false); }
     function updateGlobalFontSizeDisplay() { globalFontSizeDisplay.textContent = `${globalFontSize}px`; }
-
-    function changeSnippetFontSize(snippetId, increase) {
-        const [category, snippetIndex] = findSnippetLocation(snippetId);
-        if (category) {
-            const snippet = category.snippets[snippetIndex];
-            let currentSize = snippet.fontSize || globalFontSize;
-            if (increase) { currentSize++; } else { currentSize = Math.max(8, currentSize - 1); }
-            snippet.fontSize = currentSize;
-            saveData(data, false);
-        }
-    }
-    
-    function changeSnippetColor(snippetId, newColor) {
-        const [category, snippetIndex] = findSnippetLocation(snippetId);
-        if (category) {
-            category.snippets[snippetIndex].color = newColor;
-            saveData(data, false);
-        }
-    }
-    
-    function handleQuickAdd() {
-        const content = quickAddInput.value.trim();
-        if (content === '') {
-            showToast('❌ 內容不得為空！');
-            return; 
-        }
-        
-        let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID);
-        if (!uncategorized) {
-            uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] };
-            data.push(uncategorized);
-        }
-        const newSnippet = {
-            id: `snip-${Date.now()}`,
-            title: content.substring(0, 15) + (content.length > 15 ? '...' : ''),
-            content: content,
-            fontSize: globalFontSize,
-            color: '#FFFFFF'
-        };
-        uncategorized.snippets.unshift(newSnippet);
-        quickAddInput.value = '';
-        showToast('✅ 快速新增至「未分類」');
-        saveData(data);
-    }
-
-    function deleteCategory(categoryId) {
-        const category = data.find(c => c.id === categoryId);
-        if (!category) return;
-        if (confirm(`確定要刪除分類「${category.name}」嗎？\n分類下的所有範本將會被移至「未分類範本」。`)) {
-            let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID);
-            if (!uncategorized) { uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }; data.push(uncategorized); }
-            uncategorized.snippets.unshift(...(category.snippets || []));
-            data = data.filter(c => c.id !== categoryId);
-            if (activeCategoryId === categoryId) { activeCategoryId = UNCATEGORIZED_ID; }
-            saveData(data);
-        }
-    }
-
-    function deleteSnippet(snippetId) {
-        if (confirm('確定要刪除這個範本嗎？')) {
-            const [category, snippetIndex] = findSnippetLocation(snippetId);
-            if (category) {
-                category.snippets.splice(snippetIndex, 1);
-                saveData(data);
-            }
-        }
-    }
-    
-    function handleImport(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (Array.isArray(importedData)) {
-                        if (confirm('確定要匯入資料嗎？這將會覆蓋所有雲端上的現有資料。')) {
-                            data = importedData;
-                            saveData(data);
-                            showToast('✅ 資料匯入成功！');
-                        }
-                    } else { throw new Error('Invalid data format'); }
-                } catch (error) { alert('匯入失敗！檔案格式不正確或已損毀。'); }
-            };
-            reader.readAsText(file);
-            importFileInput.value = '';
-        }
-    }
-
-    function handleExport() {
-        const dataStr = JSON.stringify(data, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        const timestamp = new Date().toISOString().slice(0, 10);
-        link.download = `雲教室剪貼簿備份_${timestamp}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showToast('✅ 資料匯出成功！');
-    }
-    
-    function setupDragAndDrop() { let draggedItemId = null; snippetList.addEventListener('dragstart', e => { const card = e.target.closest('.snippet-card'); if (card) { draggedItemId = card.dataset.id; setTimeout(() => card.classList.add('dragging'), 0); } }); snippetList.addEventListener('dragend', e => { const card = e.target.closest('.snippet-card'); if (card) card.classList.remove('dragging'); }); snippetList.addEventListener('dragover', e => e.preventDefault()); snippetList.addEventListener('drop', e => { e.preventDefault(); const targetCard = e.target.closest('.snippet-card'); if (!targetCard || targetCard.dataset.id === draggedItemId) return; const category = data.find(c => c.id === activeCategoryId); if (!category) return; const snippetArray = category.snippets; const startIndex = snippetArray.findIndex(s => s.id === draggedItemId); const endIndex = snippetArray.findIndex(s => s.id === targetCard.dataset.id); if (startIndex === -1 || endIndex === -1) return; const [removed] = snippetArray.splice(startIndex, 1); snippetArray.splice(endIndex, 0, removed); saveData(data); }); }
+    function changeSnippetFontSize(snippetId, increase) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { const snippet = category.snippets[snippetIndex]; let currentSize = snippet.fontSize || globalFontSize; if (increase) { currentSize++; } else { currentSize = Math.max(8, currentSize - 1); } snippet.fontSize = currentSize; saveData(data, false); } }
+    function changeSnippetColor(snippetId, newColor) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { category.snippets[snippetIndex].color = newColor; saveData(data, false); } }
+    function handleQuickAdd() { const content = quickAddInput.value.trim(); if (content === '') { showToast('❌ 內容不得為空！'); return; } let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID); if (!uncategorized) { uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }; data.push(uncategorized); } const newSnippet = { id: `snip-${Date.now()}`, title: content.substring(0, 15) + (content.length > 15 ? '...' : ''), content: content, fontSize: globalFontSize, color: '#FFFFFF' }; uncategorized.snippets.unshift(newSnippet); quickAddInput.value = ''; showToast('✅ 快速新增至「未分類」'); saveData(data); }
+    function deleteCategory(categoryId) { const category = data.find(c => c.id === categoryId); if (!category) return; if (confirm(`確定要刪除分類「${category.name}」嗎？\n分類下的所有範本將會被移至「未分類範本」。`)) { let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID); if (!uncategorized) { uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }; data.push(uncategorized); } uncategorized.snippets.unshift(...(category.snippets || [])); data = data.filter(c => c.id !== categoryId); if (activeCategoryId === categoryId) { activeCategoryId = UNCATEGORIZED_ID; } saveData(data); } }
+    function deleteSnippet(snippetId) { if (confirm('確定要刪除這個範本嗎？')) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { category.snippets.splice(snippetIndex, 1); saveData(data); } } }
+    function handleImport(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { try { const importedData = JSON.parse(e.target.result); if (Array.isArray(importedData)) { if (confirm('確定要匯入資料嗎？這將會覆蓋所有雲端上的現有資料。')) { data = importedData; saveData(data); showToast('✅ 資料匯入成功！'); } } else { throw new Error('Invalid data format'); } } catch (error) { alert('匯入失敗！檔案格式不正確或已損毀。'); } }; reader.readAsText(file); importFileInput.value = ''; } }
+    function handleExport() { const dataStr = JSON.stringify(data, null, 2); const dataBlob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(dataBlob); const link = document.createElement('a'); link.href = url; const timestamp = new Date().toISOString().slice(0, 10); link.download = `雲教室剪貼簿備份_${timestamp}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); showToast('✅ 資料匯出成功！'); }
+    function setupDragAndDrop() { let draggedItemId = null; snippetList.addEventListener('dragstart', e => { if (!currentUser) { e.preventDefault(); return; } const card = e.target.closest('.snippet-card'); if (card) { draggedItemId = card.dataset.id; setTimeout(() => card.classList.add('dragging'), 0); } }); snippetList.addEventListener('dragend', e => { const card = e.target.closest('.snippet-card'); if (card) card.classList.remove('dragging'); }); snippetList.addEventListener('dragover', e => e.preventDefault()); snippetList.addEventListener('drop', e => { e.preventDefault(); const targetCard = e.target.closest('.snippet-card'); if (!targetCard || targetCard.dataset.id === draggedItemId) return; const category = data.find(c => c.id === activeCategoryId); if (!category) return; const snippetArray = category.snippets; const startIndex = snippetArray.findIndex(s => s.id === draggedItemId); const endIndex = snippetArray.findIndex(s => s.id === targetCard.dataset.id); if (startIndex === -1 || endIndex === -1) return; const [removed] = snippetArray.splice(startIndex, 1); snippetArray.splice(endIndex, 0, removed); saveData(data); }); }
     function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); } function showToast(message) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(-10px)'; }, 10); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(0)'; setTimeout(() => toast.remove(), 300); }, 2000); }
 
     // --- 應用程式啟動 ---
-    if (!firebaseConfig.apiKey || !firebaseConfig.apiKey.startsWith("AIza")) {
-        alert("錯誤：請先在程式碼中貼上您的 Firebase 設定碼 (firebaseConfig)！");
+    if (!firebaseConfig.apiKey || !firebaseConfig.projectId || firebaseConfig.apiKey === "YOUR_API_KEY") {
+        alert("錯誤：請先在程式碼中貼上您自己的 Firebase 設定碼 (firebaseConfig)！");
         noSnippetsMessage.textContent = 'Firebase 尚未設定。請依照說明文件設定後重新整理頁面。';
         noSnippetsMessage.style.display = 'block';
         return;
@@ -629,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupRealtimeListener();
     setupDragAndDrop();
+    setupAuthObserver(); // 【JS 新增】啟動驗證狀態監聽
 });
 </script>
 
