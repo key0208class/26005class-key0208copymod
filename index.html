@@ -3,33 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雲教室文字剪貼簿V4</title>
+<title>雲教室文字剪貼簿V5.0.0</title>
 <style>
-    /* --- 全域設計變數 --- */
+    /* ==========================================================================
+       💡【自訂版面配置與色系區】美編人員可直接在此處修改全域變數
+       ========================================================================== */
     :root {
-        --primary-color: #007bff;
-        --primary-hover: #0056b3;
-        --secondary-color: #6c757d;
-        --light-gray: #f8f9fa;
-        --border-color: #dee2e6;
-        --card-bg: #ffffff;
-        --shadow: 0 4px 8px rgba(0,0,0,0.1);
-        --success-color: #28a745;
-        --sidebar-width: 300px;
+        /* --- 區域與佈局大小 --- */
+        --sidebar-width: 300px;       /* 側邊欄寬度 */
+        --card-min-width: 300px;      /* 範本卡片最小寬度 */
+        --card-max-height: 200px;     /* 範本卡片內容最大高度 */
+
+        /* --- 自訂色彩計畫 (自然清晰風格) --- */
+        --primary-color: #007bff;     /* 主題階調色彩 (主要按鈕) */
+        --primary-hover: #0056b3;     /* 主題滑過狀態色彩 */
+        --secondary-color: #6c757d;   /* 次要輔助色彩 */
+        --light-gray: #f8f9fa;        /* 全域網頁底色 */
+        --border-color: #dee2e6;      /* 區塊邊框色彩 */
+        --card-bg: #ffffff;           /* 卡片主要底色 */
+        --success-color: #28a745;     /* 成功提示/複製按鈕色彩 */
+        --danger-color: #dc3545;      /* 刪除/危險操作色彩 */
+        
+        /* --- 視覺效果與圖形陰影 --- */
+        --shadow: 0 4px 8px rgba(0,0,0,0.1); /* 輕量現代感陰影 */
     }
 
-    /* --- 基本佈局 --- */
+    /* --- 全域設計 --- */
     body {
         font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
         background-color: var(--light-gray);
         margin: 0;
         height: 100vh;
         overflow: hidden;
+        display: flex;
+        flex-direction: column; /* 確保提示橫幅置頂並向下推擠內容 */
     }
+
+    /* ==========================================================================
+       📢【新元件】最頂端提示訊息橫幅樣式
+       ========================================================================== */
+    .top-notification-banner {
+        width: 100%;
+        padding: 12px 20px;
+        text-align: center;
+        font-size: 14px; /* 💡 可自行修改提示文字大小 */
+        font-weight: 600;
+        box-sizing: border-box;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    /* 擁有者模式底色 (自然粉藍) */
+    .top-notification-banner.owner-mode {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+        border-bottom: 1px solid #bbdefb;
+    }
+    /* 唯讀模式底色 (溫和警告橘) */
+    .top-notification-banner.readonly-mode {
+        background-color: #fff3e0;
+        color: #e65100;
+        border-bottom: 1px solid #ffe0b2;
+    }
+
     .container { 
         display: flex;
         width: 100%; 
-        height: 100%; 
+        flex-grow: 1;
+        height: calc(100vh - 45px); /* 動態扣除橫幅高度 */
+        overflow: hidden;
     }
     
     /* --- 側邊欄佈局與動畫 --- */
@@ -57,7 +103,6 @@
         flex-grow: 1; 
         padding: 20px; 
         overflow-y: auto;
-        height: 100vh;
         box-sizing: border-box;
     }
     
@@ -80,30 +125,34 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 50px; 
+        font-size: 16px; 
     }
     .sidebar-toggle-btn:hover { 
         background-color: white;
         box-shadow: 3px 0 8px rgba(0,0,0,0.15);
     }
-    .sidebar-toggle-btn .icon-open, .sidebar-toggle-btn .icon-close { transition: opacity 0.2s; }
     .sidebar-toggle-btn .icon-close { display: none; }
     .container.sidebar-open .sidebar-toggle-btn .icon-open { display: none; }
     .container.sidebar-open .sidebar-toggle-btn .icon-close { display: inline; }
 
-    /* --- 【CSS V3】使用者驗證區塊 --- */
+    /* --- 使用者驗證區塊 --- */
     #auth-container {
-        padding: 10px;
+        padding: 12px;
         border-bottom: 1px solid var(--border-color);
-        margin: -15px -15px 15px -15px; /* 上下左右貼齊 sidebar padding */
-        background-color: #f8f9fa;
+        margin: -15px -15px 15px -15px;
+        background-color: #f1f3f5;
         text-align: center;
     }
     #user-profile {
         display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .user-meta-box {
+        display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        width: 100%;
     }
     #user-info {
         display: flex;
@@ -131,8 +180,7 @@
         display: none !important;
     }
 
-
-    /* --- 其餘樣式 --- */
+    /* --- 其他排版元件 --- */
     .sidebar-header { padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
     .quick-add-container { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; }
     #quick-add-input { flex-grow: 1; width: auto; padding: 10px 12px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 16px; box-sizing: border-box; }
@@ -147,79 +195,80 @@
     .content-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
     .content-header h2 { margin: 0; color: #333; }
     .header-controls { display: flex; align-items: center; gap: 20px;}
-    .snippet-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    
+    /* --- 範本展示格線系統 --- */
+    .snippet-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr)); gap: 20px; }
     .snippet-card { border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: box-shadow 0.3s, background-color 0.3s; cursor: grab; }
     .snippet-card:active { cursor: grabbing; }
     .snippet-card.dragging { opacity: 0.5; background: #cce5ff; }
     .snippet-card:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    
     .snippet-header { font-weight: bold; padding: 12px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     .snippet-title { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .snippet-content { padding: 15px; white-space: pre-wrap; word-break: break-word; background-color: rgba(255,255,255,0.6); flex-grow: 1; font-family: 'Consolas', 'Monaco', monospace; color: #333; min-height: 80px; max-height: 200px; overflow-y: auto; transition: font-size 0.2s; margin: 0 1px; }
+    .snippet-content { padding: 15px; white-space: pre-wrap; word-break: break-word; background-color: rgba(255,255,255,0.6); flex-grow: 1; font-family: 'Consolas', 'Monaco', monospace; color: #333; min-height: 80px; max-height: var(--card-max-height); overflow-y: auto; transition: font-size 0.2s; margin: 0 1px; }
     .snippet-footer { padding: 10px 15px; background-color: transparent; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); gap: 10px; }
+    
     .font-controls { display: flex; align-items: center; gap: 4px; background-color: var(--light-gray); padding: 2px 4px; border-radius: 5px; }
     .font-controls .btn-icon { background-color: #fff; border: 1px solid var(--border-color); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; line-height: 1; }
     .font-controls .current-font-size { font-size: 12px; font-weight: normal; color: var(--secondary-color); min-width: 30px; text-align: center; }
+    
+    /* --- 通用按鈕樣式 --- */
     .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background-color 0.2s, opacity 0.2s; white-space: nowrap; }
     .btn:not(:last-child) { margin-right: 5px; }
-    .btn-primary { background-color: var(--primary-color); color: white; } .btn-primary:hover { background-color: var(--primary-hover); } .btn-success { background-color: var(--success-color); color: white; } .btn-secondary { background-color: var(--secondary-color); color: white; } .btn-danger { background-color: #dc3545; color: white; } .btn-sm { padding: 5px 10px; font-size: 12px; } .btn-icon { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; line-height: 1; } .btn-icon:hover { background-color: rgba(0,0,0,0.1); }
+    .btn-primary { background-color: var(--primary-color); color: white; } .btn-primary:hover { background-color: var(--primary-hover); } 
+    .btn-success { background-color: var(--success-color); color: white; } 
+    .btn-secondary { background-color: var(--secondary-color); color: white; } 
+    .btn-danger { background-color: var(--danger-color); color: white; } 
+    .btn-share { background-color: #17a2b8; color: white; } /* 💡 新增分享按鈕色彩藍綠色 */
+    .btn-sm { padding: 5px 10px; font-size: 12px; } 
+    .btn-icon { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; line-height: 1; } .btn-icon:hover { background-color: rgba(0,0,0,0.1); }
+    
     .category-actions .btn-icon { visibility: hidden; opacity: 0; transition: opacity 0.2s; } .category-item:not(.special-category):hover .category-actions .btn-icon { visibility: visible; opacity: 1; }
+    
+    /* --- 調色盤樣式 --- */
     .color-palette { display: flex; align-items: center; gap: 6px; width: 100%; padding-top: 8px; order: 10; }
     .color-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
     .color-swatch:hover { transform: scale(1.15); }
     .color-swatch.active { border-color: var(--primary-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color); }
+    
     #no-snippets-message { color: var(--secondary-color); text-align: center; margin-top: 40px;}
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.75); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; font-size: 14px; pointer-events: none; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
+    
+    /* --- 對話框與遮罩 --- */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .modal-overlay.show { opacity: 1; pointer-events: auto; } .modal { background-color: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 500px; transform: scale(0.9); transition: transform 0.3s ease; } .modal-overlay.show .modal { transform: scale(1); }
     .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 1.2em; font-weight: 500; } .modal-body { padding: 20px; } .modal-body input, .modal-body textarea, .modal-body select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; box-sizing: border-box; }
     .modal-body textarea { min-height: 150px; resize: vertical; margin-top: 15px; } .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); text-align: right; }
     .emoji-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 5px; margin-bottom: 15px; } .emoji-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; padding: 5px; border-radius: 4px; transition: background-color 0.2s; } .emoji-btn:hover { background-color: #f0f0f0; }
 
+    .snippet-header-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     
-    .snippet-header-controls {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-shrink: 0;
-    }
-    .snippet-card.is-minimized .snippet-content {
-        /* 縮小時：隱藏內容區域 */
-        max-height: 0;
-        padding-top: 0;
-        padding-bottom: 0;
-        opacity: 0;
-        overflow: hidden;
-        min-height: 0;
-        margin: 0 1px; /* 保持原有的 margin */
-        transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.2s ease-out;
-    }
-    .snippet-card:not(.is-minimized) .snippet-content {
-        /* 展開時：套用過渡動畫 */
-        transition: max-height 0.3s ease-in, padding 0.3s ease-in, opacity 0.3s ease-in 0.1s;
-    }
-    .snippet-card.is-minimized .move-snippet-btn,
-    .snippet-card.is-minimized .delete-snippet-btn,
-    .snippet-card.is-minimized .color-palette {
-        /* 縮小時：隱藏「移動」、「刪除」和「調色盤」 */
-        display: none;
-    }
-    /* --- [CSS V4.0 結束] --- */
-
+    /* --- 縮放卡片動畫過渡區 --- */
+    .snippet-card.is-minimized .snippet-content { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; overflow: hidden; min-height: 0; margin: 0 1px; transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.2s ease-out; }
+    .snippet-card:not(.is-minimized) .snippet-content { transition: max-height 0.3s ease-in, padding 0.3s ease-in, opacity 0.3s ease-in 0.1s; }
+    .snippet-card.is-minimized .move-snippet-btn, .snippet-card.is-minimized .delete-snippet-btn, .snippet-card.is-minimized .color-palette { display: none; }
 </style>
 </head>
 <body>
+
+<div id="global-status-banner" class="top-notification-banner owner-mode">
+    🔍 正在初始化雲端安全系統...
+</div>
 
 <div class="container" id="app-container">
     <aside class="sidebar">
         <div id="auth-container">
             <div id="user-profile" class="hidden">
-                <div id="user-info">
-                    <img id="user-pic" src="" alt="User photo">
-                    <span id="user-name"></span>
+                <div class="user-meta-box">
+                    <div id="user-info">
+                        <img id="user-pic" src="" alt="User photo">
+                        <span id="user-name">載入中...</span>
+                    </div>
+                    <button id="logout-btn" class="btn btn-secondary btn-sm">登出</button>
                 </div>
-                <button id="logout-btn" class="btn btn-secondary btn-sm">登出</button>
+                <button id="copy-share-url-btn" class="btn btn-share btn-sm" style="width:100%; margin-top:5px;">🔗 複製我的共享專屬連結</button>
             </div>
-            <button id="login-btn" class="btn btn-primary">使用 Google 登入以編輯</button>
+            <button id="login-btn" class="btn btn-primary">🔑 使用 Google 帳號登入系統</button>
         </div>
 
         <div class="sidebar-header">
@@ -248,7 +297,7 @@
         <div class="content-header">
             <h2 id="current-category-title">所有項目</h2>
             <div class="header-controls">
-                <div class="font-controls">
+                <div class="font-controls global-font-controls">
                     <span class="font-controls-label">全體字體：</span>
                     <button id="global-font-decrease-btn" class="btn btn-icon btn-sm" title="縮小全體字體">－</button>
                     <span id="global-font-size-display" class="current-font-size">14px</span>
@@ -258,7 +307,7 @@
             </div>
         </div>
         <div id="snippet-list" class="snippet-list"></div>
-        <p id="no-snippets-message" style="display: none;">正在從雲端載入資料...</p>
+        <p id="no-snippets-message" style="display: none;">正在從雲端載入資料庫...</p>
     </main>
 </div>
 
@@ -270,37 +319,42 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Firebase 設定 ---
-    // ⭐⭐⭐ 請務必在此處貼上您自己的 Firebase 專案設定碼！ ⭐⭐⭐
+    // ==========================================================================
+    // ⭐【設定區】請務必在此處貼上您自己的 Firebase 專案設定碼！
+    // ==========================================================================
     const firebaseConfig = {
-      apiKey: "AIzaSyCCVwJOEabrF05MEez7zzLMGKxGMZAe1xE",
-  authDomain: "cloud-clipboard-app.firebaseapp.com",
-  projectId: "cloud-clipboard-app",
-  storageBucket: "cloud-clipboard-app.firebasestorage.app",
-  messagingSenderId: "455861275279",
-  appId: "1:455861275279:web:e4f584d358489a630cbefa"
+        apiKey: "AIzaSyCCVwJOEabrF05MEez7zzLMGKxGMZAe1xE",
+        authDomain: "cloud-clipboard-app.firebaseapp.com",
+        projectId: "cloud-clipboard-app",
+        storageBucket: "cloud-clipboard-app.firebasestorage.app",
+        messagingSenderId: "455861275279",
+        appId: "1:455861275279:web:e4f584d358489a630cbefa"
     };
     
-    // --- 應用程式初始化 ---
+    // 初始化 Firebase
     try {
         firebase.initializeApp(firebaseConfig);
-    } catch (e) { console.error("Firebase 初始化失敗: ", e); alert("Firebase 初始化失敗！"); return; }
+    } catch (e) { 
+        console.error("Firebase 初始化失敗: ", e); 
+        alert("Firebase 初始化失敗！請檢查網路設定。"); 
+        return; 
+    }
     
-    // 【JS V3】新增 auth 服務
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const docRef = db.collection("clipboardData").doc("main");
 
     // --- DOM 元素定義 ---
-    // 【JS V3】Auth 相關的 DOM 元素
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userProfile = document.getElementById('user-profile');
     const userName = document.getElementById('user-name');
     const userPic = document.getElementById('user-pic');
+    const copyShareUrlBtn = document.getElementById('copy-share-url-btn');
+    const globalStatusBanner = document.getElementById('global-status-banner');
 
     const appContainer = document.getElementById('app-container');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
@@ -316,55 +370,103 @@ document.addEventListener('DOMContentLoaded', () => {
     const quickAddInput = document.getElementById('quick-add-input');
     const quickAddBtn = document.getElementById('quick-add-btn');
     const importFileInput = document.getElementById('import-file-input');
+    
+    // Modal 元件
     const categoryModalOverlay = document.getElementById('category-modal-overlay'); const categoryModalInput = document.getElementById('category-modal-input'); const categoryModalConfirm = document.getElementById('category-modal-confirm'); const categoryModalCancel = document.getElementById('category-modal-cancel'); const categoryModalTitle = document.getElementById('category-modal-title'); const emojiPicker = document.getElementById('emoji-picker'); const snippetModalOverlay = document.getElementById('snippet-modal-overlay'); const snippetModalTitleInput = document.getElementById('snippet-modal-title-input'); const snippetModalContentInput = document.getElementById('snippet-modal-content-input'); const snippetModalConfirm = document.getElementById('snippet-modal-confirm'); const snippetModalCancel = document.getElementById('snippet-modal-cancel'); const snippetModalTitle = document.getElementById('snippet-modal-title'); const moveSnippetModalOverlay = document.getElementById('move-snippet-modal-overlay'); const moveSnippetCategorySelect = document.getElementById('move-snippet-category-select'); const moveSnippetModalConfirm = document.getElementById('move-snippet-modal-confirm'); const moveSnippetModalCancel = document.getElementById('move-snippet-modal-cancel');
+    
     const globalFontIncreaseBtn = document.getElementById('global-font-increase-btn');
     const globalFontDecreaseBtn = document.getElementById('global-font-decrease-btn');
     const globalFontSizeDisplay = document.getElementById('global-font-size-display');
     
-    // --- 應用程式狀態 ---
+    // --- 應用程式動態變數狀態 ---
     let data = [];
     let activeCategoryId = 'all';
     let globalFontSize = 14;
-    let currentUser = null; // 【JS V3】用來儲存當前使用者狀態
+    let currentUser = null;         /* 當前登入的使用者物件 */
+    let targetClipboardUid = null;  /* 目前網頁正在讀取的剪貼簿擁有者 UID */
+    let dbListenerUnsubscribe = null; /* 即時監聽器的解除暫存暫存常駐物件 */
+    
     const UNCATEGORIZED_ID = 'cat-uncategorized';
     const PRESET_COLORS = ['#FFFFFF', '#FFF9C4', '#C8E6C9', '#BBDEFB', '#FFCDD2', '#D1C4E9', '#CFD8DC'];
 
-    // --- 【JS V3】使用者驗證相關函式 ---
+    // 解析 URL 參數以判斷是否為外部分享連結
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    // --- 【核心核心邏輯】安全權限與驗證監聽常駐 ---
     function setupAuthObserver() {
         auth.onAuthStateChanged(user => {
             currentUser = user;
+            const shareUid = getQueryParam('uid');
+
             if (user) {
-                // 使用者已登入
+                // 已登入使用者資訊處理
                 userProfile.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
                 userName.textContent = user.displayName;
                 userPic.src = user.photoURL;
-                setEditingEnabled(true);
             } else {
-                // 使用者已登出
+                // 登出狀態
                 userProfile.classList.add('hidden');
                 loginBtn.classList.remove('hidden');
-                setEditingEnabled(false);
             }
+
+            // 決定「目前應該去讀取誰的剪貼簿資料」
+            if (shareUid) {
+                // 優先權 1：網址帶有分享 uid 參數
+                targetClipboardUid = shareUid;
+            } else if (user) {
+                // 優先權 2：沒有參數，但本身已登入，載入自己的專屬帳號
+                targetClipboardUid = user.uid;
+            } else {
+                // 優先權 3：未登入也沒有帶參數
+                targetClipboardUid = null;
+            }
+
+            // 依據目前綁定的剪貼簿主權人與當前訪問者關係，初始化橫幅狀態
+            updateGlobalStatusBanner();
         });
     }
 
-    function signIn() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(error => {
-            console.error("登入失敗:", error);
-            alert("登入失敗，請檢查彈出視窗是否被阻擋，或稍後再試。");
-        });
+    // 更新頂部訊息提示橫幅狀態
+    function updateGlobalStatusBanner() {
+        globalStatusBanner.classList.remove('owner-mode', 'readonly-mode');
+        
+        if (!targetClipboardUid) {
+            // 完全沒有定位到任何目標剪貼簿
+            globalStatusBanner.className = 'top-notification-banner readonly-mode';
+            globalStatusBanner.innerHTML = '📢 歡迎使用雲教室文字剪貼簿！請先登入您的 Google 帳號以啟用個人專屬雲端空間。';
+            data = [];
+            if(dbListenerUnsubscribe) dbListenerUnsubscribe();
+            render();
+            setEditingEnabled(false);
+            return;
+        }
+
+        // 判斷當前訪問者是否為該剪貼簿的所有權人
+        const isOwner = !!(currentUser && currentUser.uid === targetClipboardUid);
+
+        if (isOwner) {
+            globalStatusBanner.className = 'top-notification-banner owner-mode';
+            const fromShareText = getQueryParam('uid') ? '（經由分享網址進入）' : '';
+            globalStatusBanner.innerHTML = `👋 歡迎回來，${escapeHtml(currentUser.displayName)}！您正在編輯自己的<b>【個人專屬雲端剪貼簿】</b>${fromShareText}。`;
+            copyShareUrlBtn.classList.remove('hidden');
+        } else {
+            globalStatusBanner.className = 'top-notification-banner readonly-mode';
+            globalStatusBanner.innerHTML = '👁️ 提示：您目前正在瀏覽<b>【他人的共享文字剪貼簿】(唯讀模式)</b>。您可以自由查看與複製內容。';
+            copyShareUrlBtn.classList.add('hidden');
+        }
+
+        // 啟動實時資料監聽機制
+        setupRealtimeListener(targetClipboardUid);
     }
 
-    function signOut() {
-        auth.signOut();
-    }
-    
-    // --- 【JS V3】權限控制函式 ---
-    function setEditingEnabled(isLoggedIn) {
-        // 選擇所有需要權限的按鈕和輸入框
-        const restrictedElements = [
+    // 權限控制開關：依據是否具有所有權鎖定或釋放輸入控制
+    function setEditingEnabled(hasOwnerRights) {
+        // 需要在唯讀模式下完全隱藏或停用的操作元件清單
+        const ownerOnlyElements = [
             quickAddInput, quickAddBtn, addCategoryBtn, importBtn, addSnippetBtn,
             ...document.querySelectorAll('.edit-cat-btn'),
             ...document.querySelectorAll('.delete-cat-btn'),
@@ -375,52 +477,117 @@ document.addEventListener('DOMContentLoaded', () => {
             ...document.querySelectorAll('.font-increase-btn'),
             ...document.querySelectorAll('.font-decrease-btn'),
             ...document.querySelectorAll('.global-font-controls'),
-            ...document.querySelectorAll('.toggle-snippet-btn') // [V4.0 新增] 縮放按鈕也需權限
+            ...document.querySelectorAll('.toggle-snippet-btn')
         ];
         
-        restrictedElements.forEach(el => {
-            if (el) {
-                el.style.display = isLoggedIn ? '' : 'none';
-            }
+        ownerOnlyElements.forEach(el => {
+            if (el) el.style.display = hasOwnerRights ? '' : 'none';
         });
 
-        // 處理一些特殊情況，例如 flex 容器
+        // 隱藏區塊的外圍包覆 Flex 容器
         document.querySelectorAll('.category-actions, .snippet-actions, .snippet-header-controls').forEach(el => {
-             // [V4.0 修改] .snippet-header-controls 也加入判斷
-             if(el) { el.style.display = isLoggedIn ? '' : 'flex'; }
+             if(el) el.style.display = hasOwnerRights ? '' : 'none';
         });
-        
-        // [V4.0 修正] 登出時，字體控制項和縮放按鈕所在的 .snippet-header-controls 容器應該被隱藏
-        // 但登入時，它應該是 'flex' 而不是 ''(block)
-        if (!isLoggedIn) {
-             document.querySelectorAll('.snippet-header-controls').forEach(el => {
-                el.style.display = 'none';
-             });
-        }
 
-
-        // 更新輸入框的 placeholder 文字
         if (quickAddInput) {
-            quickAddInput.placeholder = isLoggedIn ? '快速新增範本...' : '登入後即可新增';
-            quickAddInput.disabled = !isLoggedIn;
+            quickAddInput.placeholder = hasOwnerRights ? '快速新增範本...' : '🔒 唯讀模式下無法新增項目';
+            quickAddInput.disabled = !hasOwnerRights;
         }
 
-        // 讓卡片在登入時才能拖曳
+        // 限制非所有權人不得拖曳排列卡片順序
         document.querySelectorAll('.snippet-card').forEach(card => {
-            card.draggable = isLoggedIn;
+            card.draggable = hasOwnerRights;
         });
     }
 
+    // 登入驗證與登出服務
+    function signIn() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(error => {
+            console.error("Google 登入失敗:", error);
+            alert("驗證程序中斷，請確認瀏覽器彈出視窗未被阻擋。");
+        });
+    }
 
-    // --- 資料操作函式 ---
+    function signOut() {
+        if(confirm("確定要登出系統嗎？")) {
+            auth.signOut().then(() => {
+                // 登出後若本來在別人的網頁則保留，否則清空
+                if(!getQueryParam('uid')) {
+                    window.location.search = ''; 
+                }
+            });
+        }
+    }
+
+    // 複製分享連結至剪貼簿
+    function copyShareLink() {
+        if (!currentUser) return;
+        // 自動抓取目前的網頁主網址，並串接專屬 uid 參數
+        const shareUrl = `${window.location.origin}${window.location.pathname}?uid=${currentUser.uid}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showToast('🔗 已複製專屬分享連結！您可以將此網址提供給其他人共同瀏覽。');
+        }, () => {
+            alert(`複製失敗，請手動複製以下網址：\n${shareUrl}`);
+        });
+    }
+
+    // --- 資料同步操作函式 ---
     async function saveData(newData, showToastMsg = true) { 
-        if (!currentUser) { 
-            showToast('⚠️ 請先登入才能修改資料');
+        const isOwner = !!(currentUser && currentUser.uid === targetClipboardUid);
+        if (!isOwner) { 
+            showToast('⚠️ 唯讀模式下無法儲存或異動資料。');
             return;
         }
-        try { await docRef.set({ categories: newData }); if(showToastMsg) showToast('💾 資料已同步至雲端'); } catch (error) { console.error("儲存資料至 Firebase 時發生錯誤: ", error); showToast("❌ 儲存失敗！權限不足或網路錯誤。"); } 
+        try { 
+            await db.collection("clipboardData").doc(targetClipboardUid).set({ categories: newData }); 
+            if(showToastMsg) showToast('💾 資料已自動同步至雲端資料庫'); 
+        } catch (error) { 
+            console.error("Firebase 寫入失敗: ", error); 
+            showToast("❌ 同步失敗！可能由於權限設定異常。"); 
+        } 
     }
-    function setupRealtimeListener() { docRef.onSnapshot(doc => { if (doc.exists) { const cloudData = doc.data().categories || []; if (!cloudData.find(c => c.id === UNCATEGORIZED_ID)) { cloudData.push({ id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }); } data = cloudData; } else { const defaultData = [ { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }, { id: 'cat-1', name: '✏️ 學校用', snippets: [{ id: 'snip-1-1', title: '回家作業格式', content: '國語：\n數學：\n英文：\n其他：', color: '#BBDEFB', fontSize: 14, isMinimized: true }] }, ]; data = defaultData; if (currentUser) { saveData(data); } } render(); }, error => { console.error("Firebase 監聽器錯誤: ", error); noSnippetsMessage.textContent = '無法連接雲端資料庫，請檢查網路或 Firebase 設定。'; noSnippetsMessage.style.display = 'block'; }); }
+
+    function setupRealtimeListener(uid) { 
+        // 若已有舊的監聽程序在執行，先將其切斷關閉
+        if (dbListenerUnsubscribe) dbListenerUnsubscribe();
+
+        dbListenerUnsubscribe = db.collection("clipboardData").doc(uid).onSnapshot(doc => { 
+            const isOwner = !!(currentUser && currentUser.uid === targetClipboardUid);
+            
+            if (doc.exists) { 
+                const cloudData = doc.data().categories || []; 
+                if (!cloudData.find(c => c.id === UNCATEGORIZED_ID)) { 
+                    cloudData.push({ id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }); 
+                } 
+                data = cloudData; 
+            } else { 
+                // 資料不存在時的反饋
+                if (isOwner) {
+                    // 如果是擁有者本人，為其初始化建立預設範本
+                    const defaultData = [ 
+                        { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }, 
+                        { id: 'cat-1', name: '✏️ 學校用', snippets: [{ id: 'snip-1-1', title: '回家作業格式', content: '國語：\n數學：\n英文：\n其他：', color: '#BBDEFB', fontSize: 14, isMinimized: true }] }, 
+                    ]; 
+                    data = defaultData; 
+                    saveData(data, false); 
+                } else {
+                    // 外部訪客瀏覽時卻查無此資料
+                    data = [];
+                    noSnippetsMessage.textContent = '🔍 找不到該連結對應的剪貼簿資料，可能擁有人已關閉專案或網址不正確。';
+                    noSnippetsMessage.style.display = 'block';
+                    render();
+                    setEditingEnabled(false);
+                    return;
+                }
+            } 
+            render(); 
+        }, error => { 
+            console.error("Firebase 讀取安全性權限錯誤: ", error); 
+            noSnippetsMessage.textContent = '🔒 無法載入此雲端資料，可能是安全性授權失敗或網路中斷。'; 
+            noSnippetsMessage.style.display = 'block'; 
+        }); 
+    }
     
     // --- 核心渲染函式 ---
     function render() { renderCategories(); renderSnippets(); }
@@ -451,21 +618,15 @@ document.addEventListener('DOMContentLoaded', () => {
             noSnippetsMessage.style.display = 'none';
             snippetsToRender.forEach(snippet => {
                 const card = document.createElement('div');
-
-                // --- [V4.0 新增] (Task 2) 處理縮放狀態 ---
-                // 預設為縮小 (true)，除非 data 中有儲存狀態
                 const isMinimized = snippet.isMinimized === undefined ? true : snippet.isMinimized;
                 card.className = `snippet-card ${isMinimized ? 'is-minimized' : ''}`;
-                // --- [V4.0 新增結束] ---
-                
                 card.dataset.id = snippet.id;
-                //卡片是否可拖曳的權限，由 setEditingEnabled 控制
+                
                 const currentFontSize = snippet.fontSize || globalFontSize;
                 const currentBgColor = snippet.color || '#FFFFFF';
                 card.style.backgroundColor = currentBgColor;
                 const paletteHtml = PRESET_COLORS.map(color => `<button class="color-swatch" style="background-color: ${color}; ${color === currentBgColor ? 'border-color: var(--primary-color); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);' : ''}" data-color="${color}" title="設定顏色為 ${color}"></button>`).join('');
                 
-                // --- [V4.0 修改] (Task 2) 調整 card.innerHTML 以支援縮放按鈕 ---
                 card.innerHTML = `
                     <div class="snippet-header"> 
                         <span class="snippet-title">${escapeHtml(snippet.title)}</span> 
@@ -485,28 +646,29 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-sm btn-secondary edit-snippet-btn">編輯</button> 
                             <button class="btn btn-sm btn-danger delete-snippet-btn">刪除</button> 
                         </div>
-                        <button class="btn btn-success copy-snippet-btn">複製內容</button>
+                        <button class="btn btn-success copy-snippet-btn">📋 複製內容</button>
                         <div class="color-palette">${paletteHtml}</div>
                     </div>`;
-                // --- [V4.0 修改結束] ---
                 snippetList.appendChild(card);
             });
         } else {
             noSnippetsMessage.style.display = 'block';
             noSnippetsMessage.textContent = searchQuery ? '找不到符合條件的範本。' : '這個分類還沒有範本喔！';
         }
-        // 【JS V3】每次渲染後，根據登入狀態更新 UI 權限
-        setEditingEnabled(!!currentUser);
+        
+        // 每一次卡片重繪完成，皆必須立即重新檢查並實施對應身分權限鎖定
+        const isOwner = !!(currentUser && currentUser.uid === targetClipboardUid);
+        setEditingEnabled(isOwner);
     }
     
-    // --- Modal 控制模組 (內部邏輯不變) ---
+    // --- Modal 快顯視窗控制模組 ---
     const modalControls = (() => { let activeCategoryId = null; let activeSnippetId = null; let onConfirmCallback = null; const emojis = ['📑', '📂', '✏️', '💡', '💬', '❤️', '⚙️', '🚀', '🎯', '🎉', '💰', '📈', '🔔', '🌍', '🧑‍💻']; emojiPicker.innerHTML = emojis.map(e => `<button class="emoji-btn">${e}</button>`).join(''); emojiPicker.addEventListener('click', e => { if(e.target.matches('.emoji-btn')) { categoryModalInput.value += e.target.textContent; categoryModalInput.focus(); } }); function show(overlay, onShow = () => {}) { overlay.classList.add('show'); onShow(); } function hide(overlay) { overlay.classList.remove('show'); onConfirmCallback = null; } categoryModalCancel.addEventListener('click', () => hide(categoryModalOverlay)); snippetModalCancel.addEventListener('click', () => hide(snippetModalOverlay)); moveSnippetModalCancel.addEventListener('click', () => hide(moveSnippetModalOverlay)); categoryModalConfirm.addEventListener('click', () => { if (categoryModalInput.value.trim()) { onConfirmCallback(categoryModalInput.value.trim()); hide(categoryModalOverlay); } }); snippetModalConfirm.addEventListener('click', () => { if (snippetModalTitleInput.value.trim() && snippetModalContentInput.value.trim()) { onConfirmCallback({ title: snippetModalTitleInput.value.trim(), content: snippetModalContentInput.value.trim() }); hide(snippetModalOverlay); } }); moveSnippetModalConfirm.addEventListener('click', () => { onConfirmCallback(moveSnippetCategorySelect.value); hide(moveSnippetModalOverlay); }); return { openCategoryModal(categoryId, callback) { activeCategoryId = categoryId; onConfirmCallback = callback; const isEditing = !!categoryId; categoryModalTitle.textContent = isEditing ? '編輯分類' : '新增分類'; categoryModalInput.value = isEditing ? data.find(c => c.id === categoryId).name : ''; show(categoryModalOverlay, () => categoryModalInput.focus()); }, openSnippetModal(snippetInfo, callback) { onConfirmCallback = callback; const isEditing = typeof snippetInfo === 'object' && snippetInfo !== null; snippetModalTitle.textContent = isEditing ? '編輯範本' : '新增範本'; snippetModalTitleInput.value = isEditing ? snippetInfo.title : ''; snippetModalContentInput.value = isEditing ? snippetInfo.content : ''; show(snippetModalOverlay, () => snippetModalTitleInput.focus()); }, openMoveSnippetModal(snippetId, currentCatId, callback) { activeSnippetId = snippetId; onConfirmCallback = callback; moveSnippetCategorySelect.innerHTML = data.filter(c => c.id !== currentCatId && c.id !== 'all').map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join(''); show(moveSnippetModalOverlay); } }; })();
 
-    // --- 事件監聽器設置 ---
+    // --- 全域事件處理宣告與繫結 ---
     function setupEventListeners() {
-        // 【JS V3】登入登出按鈕事件
         loginBtn.addEventListener('click', signIn);
         logoutBtn.addEventListener('click', signOut);
+        copyShareUrlBtn.addEventListener('click', copyShareLink); /* 繫結複製分享功能 */
 
         sidebarToggleBtn.addEventListener('click', () => { appContainer.classList.toggle('sidebar-open'); localStorage.setItem('sidebarOpen', appContainer.classList.contains('sidebar-open')); });
         globalFontIncreaseBtn.addEventListener('click', () => changeGlobalFontSize(true));
@@ -514,79 +676,48 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBox.addEventListener('input', renderSnippets);
         quickAddInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAdd(); } });
         quickAddBtn.addEventListener('click', handleQuickAdd);
+        
         addCategoryBtn.addEventListener('click', () => { modalControls.openCategoryModal(null, (name) => { const newCategory = { id: `cat-${Date.now()}`, name, snippets: [] }; data.push(newCategory); saveData(data); }); });
-        addSnippetBtn.addEventListener('click', () => { if (activeCategoryId === 'all') { showToast('❌ 請先選擇一個具體的分類'); return; } modalControls.openSnippetModal(null, (newSnippetData) => { const category = data.find(c => c.id === activeCategoryId); if (category) { const newSnippet = { id: `snip-${Date.now()}`, ...newSnippetData, fontSize: globalFontSize, color: '#FFFFFF', isMinimized: true }; category.snippets.unshift(newSnippet); saveData(data); } }); });
-        categoryList.addEventListener('click', (e) => { const categoryItem = e.target.closest('.category-item'); if (!categoryItem) return; const categoryId = categoryItem.dataset.id; if (e.target.closest('.edit-cat-btn')) { modalControls.openCategoryModal(categoryId, (newName) => { const category = data.find(c => c.id === categoryId); if (category) { category.name = newName; saveData(data); } }); } else if (e.target.closest('.delete-cat-btn')) { deleteCategory(categoryId); } else { 
-            activeCategoryId = categoryId; 
-            searchBox.value = ''; 
-            
-            // --- [V4.0 修復] (Task 1) ---
-            // 解決切換分類時，主內容區捲軸殘留在舊位置，導致顯示錯位的 Bug。
-            // 在渲染新分類前，將捲軸重置到最頂端。
-            const mainContent = document.querySelector('.main-content');
-            if (mainContent) {
-                mainContent.scrollTop = 0;
-            }
-            // --- [V4.0 修復結束] ---
-
-            render(); 
-            if (window.innerWidth < 768) { appContainer.classList.remove('sidebar-open'); localStorage.setItem('sidebarOpen', 'false');} 
-        } });
-        snippetList.addEventListener('click', (e) => { const card = e.target.closest('.snippet-card'); if (!card) return; const snippetId = card.dataset.id; const [category, snippetIndex] = findSnippetLocation(snippetId); if (!category) return; const snippet = category.snippets[snippetIndex]; if (e.target.matches('.font-increase-btn, .font-decrease-btn')) { changeSnippetFontSize(snippetId, e.target.matches('.font-increase-btn')); } else if (e.target.matches('.copy-snippet-btn')) { navigator.clipboard.writeText(snippet.content).then(() => showToast('✅ 已複製！'), () => showToast('❌ 複製失敗')); } else if (e.target.matches('.edit-snippet-btn')) { modalControls.openSnippetModal({ title: snippet.title, content: snippet.content }, (updatedData) => { snippet.title = updatedData.title; snippet.content = updatedData.content; saveData(data); }); } else if (e.target.matches('.delete-snippet-btn')) { deleteSnippet(snippetId); } else if (e.target.matches('.move-snippet-btn')) { modalControls.openMoveSnippetModal(snippetId, category.id, (targetCatId) => { const targetCategory = data.find(c => c.id === targetCatId); if (targetCategory) { const [removedSnippet] = category.snippets.splice(snippetIndex, 1); targetCategory.snippets.unshift(removedSnippet); saveData(data); } }); } else if (e.target.matches('.color-swatch')) { changeSnippetColor(snippetId, e.target.dataset.color); 
-            // --- [V4.0 新增] (Task 2) 監聽縮放按鈕 ---
-            } else if (e.target.matches('.toggle-snippet-btn')) {
-                toggleSnippetSize(snippetId);
-            }
-            // --- [V4.0 新增結束] ---
-        });
+        addSnippetBtn.addEventListener('click', () => { if (activeCategoryId === 'all') { showToast('❌ 請先從側邊欄選擇一個具體的分類'); return; } modalControls.openSnippetModal(null, (newSnippetData) => { const category = data.find(c => c.id === activeCategoryId); if (category) { const newSnippet = { id: `snip-${Date.now()}`, ...newSnippetData, fontSize: globalFontSize, color: '#FFFFFF', isMinimized: true }; category.snippets.unshift(newSnippet); saveData(data); } }); });
+        
+        categoryList.addEventListener('click', (e) => { const categoryItem = e.target.closest('.category-item'); if (!categoryItem) return; const categoryId = categoryItem.dataset.id; if (e.target.closest('.edit-cat-btn')) { modalControls.openCategoryModal(categoryId, (newName) => { const category = data.find(c => c.id === categoryId); if (category) { category.name = newName; saveData(data); } }); } else if (e.target.closest('.delete-cat-btn')) { deleteCategory(categoryId); } else { activeCategoryId = categoryId; searchBox.value = ''; const mainContent = document.querySelector('.main-content'); if (mainContent) { mainContent.scrollTop = 0; } render(); if (window.innerWidth < 768) { appContainer.classList.remove('sidebar-open'); localStorage.setItem('sidebarOpen', 'false');} } });
+        
+        snippetList.addEventListener('click', (e) => { const card = e.target.closest('.snippet-card'); if (!card) return; const snippetId = card.dataset.id; const [category, snippetIndex] = findSnippetLocation(snippetId); if (!category) return; const snippet = category.snippets[snippetIndex]; if (e.target.matches('.font-increase-btn, .font-decrease-btn')) { changeSnippetFontSize(snippetId, e.target.matches('.font-increase-btn')); } else if (e.target.matches('.copy-snippet-btn')) { navigator.clipboard.writeText(snippet.content).then(() => showToast('✅ 已成功複製到本機剪貼簿！'), () => showToast('❌ 複製失敗')); } else if (e.target.matches('.edit-snippet-btn')) { modalControls.openSnippetModal({ title: snippet.title, content: snippet.content }, (updatedData) => { snippet.title = updatedData.title; snippet.content = updatedData.content; saveData(data); }); } else if (e.target.matches('.delete-snippet-btn')) { deleteSnippet(snippetId); } else if (e.target.matches('.move-snippet-btn')) { modalControls.openMoveSnippetModal(snippetId, category.id, (targetCatId) => { const targetCategory = data.find(c => c.id === targetCatId); if (targetCategory) { const [removedSnippet] = category.snippets.splice(snippetIndex, 1); targetCategory.snippets.unshift(removedSnippet); saveData(data); } }); } else if (e.target.matches('.color-swatch')) { changeSnippetColor(snippetId, e.target.dataset.color); } else if (e.target.matches('.toggle-snippet-btn')) { toggleSnippetSize(snippetId); } });
+        
         importBtn.addEventListener('click', () => importFileInput.click());
         importFileInput.addEventListener('change', handleImport);
         exportBtn.addEventListener('click', handleExport);
     }
     
-    // --- 輔助函式 (部分修改以適應權限) ---
+    // --- 工具輔助函式庫 ---
     function applyInitialState() { const isSidebarOpen = localStorage.getItem('sidebarOpen') === 'true'; if (isSidebarOpen) { appContainer.classList.add('sidebar-open'); } const savedSize = localStorage.getItem('globalFontSize'); if (savedSize) { globalFontSize = parseInt(savedSize, 10); } updateGlobalFontSizeDisplay(); }
     function findSnippetLocation(snippetId) { for (const category of data) { if (category.snippets) { const index = category.snippets.findIndex(s => s.id === snippetId); if (index !== -1) return [category, index]; } } return [null, -1]; }
     function changeGlobalFontSize(increase) { if (increase) { globalFontSize++; } else { globalFontSize = Math.max(8, globalFontSize - 1); } data.forEach(category => { if (category.snippets) { category.snippets.forEach(snippet => { snippet.fontSize = globalFontSize; }); } }); localStorage.setItem('globalFontSize', globalFontSize); updateGlobalFontSizeDisplay(); saveData(data, false); }
     function updateGlobalFontSizeDisplay() { globalFontSizeDisplay.textContent = `${globalFontSize}px`; }
     function changeSnippetFontSize(snippetId, increase) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { const snippet = category.snippets[snippetIndex]; let currentSize = snippet.fontSize || globalFontSize; if (increase) { currentSize++; } else { currentSize = Math.max(8, currentSize - 1); } snippet.fontSize = currentSize; saveData(data, false); } }
-    
-    // --- [V4.0 新增] (Task 2) 範本卡片縮放功能 ---
-    function toggleSnippetSize(snippetId) {
-        const [category, snippetIndex] = findSnippetLocation(snippetId);
-        if (category) {
-            const snippet = category.snippets[snippetIndex];
-            // 預設為 true (縮小)，所以如果 undefined (true)，點擊後變 false (展開)
-            // 如果是 false (展開)，點擊後變 true (縮小)
-            snippet.isMinimized = !(snippet.isMinimized === undefined ? true : snippet.isMinimized);
-            saveData(data, false); // 儲存狀態，但不顯示 toast
-            // 注意：onSnapshot 監聽器會自動觸發 render() 來更新 UI
-        }
-    }
-    // --- [V4.0 新增結束] ---
-
+    function toggleSnippetSize(snippetId) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { const snippet = category.snippets[snippetIndex]; snippet.isMinimized = !(snippet.isMinimized === undefined ? true : snippet.isMinimized); saveData(data, false); } }
     function changeSnippetColor(snippetId, newColor) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { category.snippets[snippetIndex].color = newColor; saveData(data, false); } }
     function handleQuickAdd() { const content = quickAddInput.value.trim(); if (content === '') { showToast('❌ 內容不得為空！'); return; } let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID); if (!uncategorized) { uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }; data.push(uncategorized); } const newSnippet = { id: `snip-${Date.now()}`, title: content.substring(0, 15) + (content.length > 15 ? '...' : ''), content: content, fontSize: globalFontSize, color: '#FFFFFF', isMinimized: true }; uncategorized.snippets.unshift(newSnippet); quickAddInput.value = ''; showToast('✅ 快速新增至「未分類」'); saveData(data); }
     function deleteCategory(categoryId) { const category = data.find(c => c.id === categoryId); if (!category) return; if (confirm(`確定要刪除分類「${category.name}」嗎？\n分類下的所有範本將會被移至「未分類範本」。`)) { let uncategorized = data.find(c => c.id === UNCATEGORIZED_ID); if (!uncategorized) { uncategorized = { id: UNCATEGORIZED_ID, name: '📂 未分類範本', snippets: [] }; data.push(uncategorized); } uncategorized.snippets.unshift(...(category.snippets || [])); data = data.filter(c => c.id !== categoryId); if (activeCategoryId === categoryId) { activeCategoryId = UNCATEGORIZED_ID; } saveData(data); } }
     function deleteSnippet(snippetId) { if (confirm('確定要刪除這個範本嗎？')) { const [category, snippetIndex] = findSnippetLocation(snippetId); if (category) { category.snippets.splice(snippetIndex, 1); saveData(data); } } }
-    function handleImport(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { try { const importedData = JSON.parse(e.target.result); if (Array.isArray(importedData)) { if (confirm('確定要匯入資料嗎？這將會覆蓋所有雲端上的現有資料。')) { data = importedData; saveData(data); showToast('✅ 資料匯入成功！'); } } else { throw new Error('Invalid data format'); } } catch (error) { alert('匯入失敗！檔案格式不正確或已損毀。'); } }; reader.readAsText(file); importFileInput.value = ''; } }
-    function handleExport() { const dataStr = JSON.stringify(data, null, 2); const dataBlob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(dataBlob); const link = document.createElement('a'); link.href = url; const timestamp = new Date().toISOString().slice(0, 10); link.download = `雲教室剪貼簿備份_${timestamp}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); showToast('✅ 資料匯出成功！'); }
-    function setupDragAndDrop() { let draggedItemId = null; snippetList.addEventListener('dragstart', e => { if (!currentUser) { e.preventDefault(); return; } const card = e.target.closest('.snippet-card'); if (card) { draggedItemId = card.dataset.id; setTimeout(() => card.classList.add('dragging'), 0); } }); snippetList.addEventListener('dragend', e => { const card = e.target.closest('.snippet-card'); if (card) card.classList.remove('dragging'); }); snippetList.addEventListener('dragover', e => e.preventDefault()); snippetList.addEventListener('drop', e => { e.preventDefault(); const targetCard = e.target.closest('.snippet-card'); if (!targetCard || targetCard.dataset.id === draggedItemId) return; const category = data.find(c => c.id === activeCategoryId); if (!category) return; const snippetArray = category.snippets; const startIndex = snippetArray.findIndex(s => s.id === draggedItemId); const endIndex = snippetArray.findIndex(s => s.id === targetCard.dataset.id); if (startIndex === -1 || endIndex === -1) return; const [removed] = snippetArray.splice(startIndex, 1); snippetArray.splice(endIndex, 0, removed); saveData(data); }); }
+    function handleImport(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { try { const importedData = JSON.parse(e.target.result); if (Array.isArray(importedData)) { if (confirm('確定要匯入資料嗎？這將會完全覆蓋當前雲端空間上的所有範本。')) { data = importedData; saveData(data); showToast('✅ 資料覆蓋匯入成功！'); } } else { throw new Error('Format error'); } } catch (error) { alert('匯入失敗！檔案結構格式不相符。'); } }; reader.readAsText(file); importFileInput.value = ''; } }
+    function handleExport() { const dataStr = JSON.stringify(data, null, 2); const dataBlob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(dataBlob); const link = document.createElement('a'); link.href = url; const timestamp = new Date().toISOString().slice(0, 10); link.download = `雲教室剪貼簿備份_${timestamp}.json`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); showToast('✅ 本機備份 JSON 檔案導出成功！'); }
+    
+    // 拖曳排序事件綁定
+    function setupDragAndDrop() { let draggedItemId = null; snippetList.addEventListener('dragstart', e => { const isOwner = !!(currentUser && currentUser.uid === targetClipboardUid); if (!isOwner) { e.preventDefault(); return; } const card = e.target.closest('.snippet-card'); if (card) { draggedItemId = card.dataset.id; setTimeout(() => card.classList.add('dragging'), 0); } }); snippetList.addEventListener('dragend', e => { const card = e.target.closest('.snippet-card'); if (card) card.classList.remove('dragging'); }); snippetList.addEventListener('dragover', e => e.preventDefault()); snippetList.addEventListener('drop', e => { e.preventDefault(); const targetCard = e.target.closest('.snippet-card'); if (!targetCard || targetCard.dataset.id === draggedItemId) return; const category = data.find(c => c.id === activeCategoryId); if (!category) return; const snippetArray = category.snippets; const startIndex = snippetArray.findIndex(s => s.id === draggedItemId); const endIndex = snippetArray.findIndex(s => s.id === targetCard.dataset.id); if (startIndex === -1 || endIndex === -1) return; const [removed] = snippetArray.splice(startIndex, 1); snippetArray.splice(endIndex, 0, removed); saveData(data); }); }
     function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); } function showToast(message) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(-10px)'; }, 10); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(0)'; setTimeout(() => toast.remove(), 300); }, 2000); }
 
-    // --- 應用程式啟動 ---
+    // --- 應用程式載入啟動核心 ---
     if (!firebaseConfig.apiKey || !firebaseConfig.projectId || firebaseConfig.apiKey === "YOUR_API_KEY") {
-        alert("錯誤：請先在程式碼中貼上您自己的 Firebase 設定碼 (firebaseConfig)！");
-        noSnippetsMessage.textContent = 'Firebase 尚未設定。請依照說明文件設定後重新整理頁面。';
-        noSnippetsMessage.style.display = 'block';
+        alert("系統提示：請開啟 HTML 原始碼並貼上您的 Firebase 專案憑證物件 (firebaseConfig)。");
+        globalStatusBanner.textContent = '❌ 請先設定 Firebase 配置組態憑證。';
         return;
     }
     
     applyInitialState();
     setupEventListeners();
-    setupRealtimeListener();
     setupDragAndDrop();
-    setupAuthObserver(); // 【JS V3】啟動驗證狀態監聽
+    setupAuthObserver(); /* 啟動身分安全檢查 */
 });
 </script>
 
